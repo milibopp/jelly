@@ -43,6 +43,7 @@ integer (uint).
 
 from abc import abstractmethod, ABCMeta
 from itertools import product
+import struct
 
 
 class VoronoiCell:
@@ -63,8 +64,9 @@ class Mesh:
 
     '''
     
-    def __init__(self, cells):
+    def __init__(self, cells, boxsize=1.0):
         self.cells = cells
+        self.boxsize = boxsize
 
 
 class Mesh2D(Mesh):
@@ -91,6 +93,8 @@ class Mesh2D(Mesh):
         (0.25, 0.25, 0.0)
         >>> grid.cells[3].position
         (0.75, 0.75, 0.0)
+        >>> grid.boxsize
+        1.0
 
         '''
         # Unpack
@@ -121,14 +125,49 @@ class Mesh2D(Mesh):
             cells.append(VoronoiCell(pos, vel, id_counter, rho, rho, u))
             id_counter += 1
         # Create mesh
-        return cls(cells)
+        return cls(cells, max(dx, dy))
 
 
-class InitialConditions(metaclass=ABCMeta):
-    '''Abstract initial conditions.'''
+class ICWriter:
 
-    @property
-    @abstractmethod
-    def cells(self):
-        '''Returns a list of Voronoi cells.'''
-        pass
+    def __init__(self, fname):
+        self.fname = fname
+
+    def write(self, mesh):
+        '''Writes the given mesh to a file.'''
+        # Total number of particles
+        N = len(mesh.cells)
+        # Compile the header
+        header_parts = [
+            ('I' * 6, [N] + [0] * 5),   # Npart
+            ('d' * 6, [0.0] * 6),       # Massarr
+            ('ddii', [0.0, 0.0, 0, 0]), # Time, Redshift, FlagSfr, FlagFeedback
+            ('i' * 6, [N] + [0] * 5),   # Nall
+            ('ii', [0, 1]),             # FlagCooling, NumFiles
+            ('d', [mesh.boxsize])]      # BoxSize
+        header = bytearray()
+        for fmt, data in header_parts:
+            header += struct.pack(fmt, *data)
+        header = header + bytes(256 - len(header))
+        # Compile the body
+        chunks = [header]
+        block_specs = [
+            ('fff', lambda c: c.position),
+            ('fff', lambda c: c.velocity),
+            ('I', lambda c: [c.cell_id]),
+            ('f', lambda c: [c.mass]),
+            ('f', lambda c: [c.internal_energy]),
+            ('f', lambda c: [c.density]),
+        ]
+        for fmt, getter in block_specs:
+            body = bytearray()
+            for cell in mesh.cells:
+                body += struct.pack(fmt, *getter(cell))
+            chunks.append(body)
+        # Write everything to file
+        with open(self.fname, 'wb') as bfile:
+            for chunk in chunks:
+                size = len(chunk)
+                bfile.write(struct.pack('i', size))
+                bfile.write(chunk)
+                bfile.write(struct.pack('i', size))
