@@ -58,9 +58,24 @@ class VoronoiCell:
 
 
 class Mesh:
+    '''
+    The mesh is simply a list of Voronoi cells that make up a Voronoi diagram.
+
+    '''
     
     def __init__(self, cells):
         self.cells = cells
+
+
+class Mesh2D(Mesh):
+    '''
+    This is a particular type of mesh that restricts itself to only using the
+    xy-plane of the general three-dimensional space, in which a mesh is
+    embedded.
+
+    It provides a couple of factory methods to facilitate its creation.
+
+    '''
 
     @classmethod
     def rectangular(cls, p1, p2, nx, ny, frho=None, fvel=None, fu=None):
@@ -71,9 +86,11 @@ class Mesh:
         It uses the functions *frho*, *fvel* and *fu* to fix the hydrodynamic
         quantities.
 
-        >>> grid = Mesh.rectangular((0.0, 0.0), (1.0, 1.0), 2, 2)
+        >>> grid = Mesh2D.rectangular((0.0, 0.0), (1.0, 1.0), 2, 2)
         >>> grid.cells[0].position
         (0.25, 0.25, 0.0)
+        >>> grid.cells[3].position
+        (0.75, 0.75, 0.0)
 
         '''
         # Unpack
