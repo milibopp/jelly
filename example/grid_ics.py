@@ -12,7 +12,7 @@ def main():
     except:
         fname = 'test.dat'
     # Generate ICs
-    grid = Mesh2D.rectangular((-1.0, -1.0), (1.0, 1.0), 32, 32)
+    grid = Mesh2D.rectangular((0.0, 0.0), (2.0, 2.0), 16, 16)
     ICWriter(fname).write(grid)
 
 

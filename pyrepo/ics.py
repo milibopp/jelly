@@ -40,6 +40,7 @@ integer (uint).
 - rho float[n] -- particle densities
 
 '''
+from __future__ import division
 
 from abc import abstractmethod, ABCMeta
 from itertools import product
@@ -49,11 +50,10 @@ import struct
 class VoronoiCell:
     '''A moving-mesh hydrodynamics Voronoi cell.'''
     
-    def __init__(self, position, velocity, cell_id, mass, density, internal_energy):
+    def __init__(self, position, velocity, cell_id, density, internal_energy):
         self.position = position
         self.velocity = velocity
         self.cell_id = cell_id
-        self.mass = mass
         self.density = density
         self.internal_energy = internal_energy
 
@@ -90,9 +90,9 @@ class Mesh2D(Mesh):
 
         >>> grid = Mesh2D.rectangular((0.0, 0.0), (1.0, 1.0), 2, 2)
         >>> grid.cells[0].position
-        (0.25, 0.25, 0.0)
+        (0.0, 0.0, 0.0)
         >>> grid.cells[3].position
-        (0.75, 0.75, 0.0)
+        (0.5, 0.5, 0.0)
         >>> grid.boxsize
         1.0
 
@@ -118,11 +118,11 @@ class Mesh2D(Mesh):
         cells = []
         id_counter = 0
         for kx, ky in product(range(nx), range(ny)):
-            pos = (kx + 0.5) * dx / nx, (ky + 0.5) * dy / ny, 0.0
+            pos = kx * dx / nx, ky * dy / ny, 0.0
             vel = fvel(*pos)
             rho = frho(*pos)
             u = fu(*pos)
-            cells.append(VoronoiCell(pos, vel, id_counter, rho, rho, u))
+            cells.append(VoronoiCell(pos, vel, id_counter, rho, u))
             id_counter += 1
         # Create mesh
         return cls(cells, max(dx, dy))
@@ -155,7 +155,6 @@ class ICWriter:
             ('fff', lambda c: c.position),
             ('fff', lambda c: c.velocity),
             ('I', lambda c: [c.cell_id]),
-            ('f', lambda c: [c.mass]),
             ('f', lambda c: [c.internal_energy]),
             ('f', lambda c: [c.density]),
         ]
