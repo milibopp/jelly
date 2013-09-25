@@ -130,8 +130,8 @@ class Mesh2D(Mesh):
 
 class ICWriter:
 
-    def __init__(self, fname):
-        self.fname = fname
+    def __init__(self, output_buffer):
+        self.output_buffer = output_buffer
 
     def write(self, mesh):
         '''Writes the given mesh to a file.'''
@@ -164,9 +164,8 @@ class ICWriter:
                 body += struct.pack(fmt, *getter(cell))
             chunks.append(body)
         # Write everything to file
-        with open(self.fname, 'wb') as bfile:
-            for chunk in chunks:
-                size = len(chunk)
-                bfile.write(struct.pack('i', size))
-                bfile.write(chunk)
-                bfile.write(struct.pack('i', size))
+        for chunk in chunks:
+            size = len(chunk)
+            output_buffer.write(struct.pack('i', size))
+            output_buffer.write(chunk)
+            output_buffer.write(struct.pack('i', size))

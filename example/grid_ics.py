@@ -13,7 +13,7 @@ def main():
         fname = 'test.dat'
     # Generate ICs
     grid = Mesh2D.rectangular((0.0, 0.0), (2.0, 2.0), 16, 16)
-    ICWriter(fname).write(grid)
+    ICWriter(open('test.dat', 'wb')).write(grid)
 
 
 if __name__ == '__main__':
