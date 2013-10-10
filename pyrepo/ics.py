@@ -40,6 +40,7 @@ integer (uint).
 - rho float[n] -- particle densities
 
 '''
+
 from __future__ import division
 
 from abc import abstractmethod, ABCMeta
@@ -49,7 +50,7 @@ import struct
 
 class VoronoiCell:
     '''A moving-mesh hydrodynamics Voronoi cell.'''
-    
+
     def __init__(self, position, velocity, cell_id, density, internal_energy):
         self.position = position
         self.velocity = velocity
@@ -63,7 +64,7 @@ class Mesh:
     The mesh is simply a list of Voronoi cells that make up a Voronoi diagram.
 
     '''
-    
+
     def __init__(self, cells, boxsize=1.0):
         self.cells = cells
         self.boxsize = boxsize
@@ -84,7 +85,7 @@ class Mesh2D(Mesh):
         '''
         Generates a 2D rectangular Cartesian mesh spanning from point *p1* to
         *p2*. The grid is divided into *nx* and *ny* cells in each direction.
-        
+
         It uses the functions *frho*, *fvel* and *fu* to fix the hydrodynamic
         quantities.
 
