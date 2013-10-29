@@ -149,7 +149,7 @@ class ICWriter:
         header = bytearray()
         for fmt, data in header_parts:
             header += struct.pack(fmt, *data)
-        header = header + bytes(256 - len(header))
+        header = header + bytes('\x00') * (256 - len(header))
         # Compile the body
         chunks = [header]
         block_specs = [
@@ -167,6 +167,7 @@ class ICWriter:
         # Write everything to file
         for chunk in chunks:
             size = len(chunk)
+            print size, chunk[:10], '...', chunk[-10:]
             self.output_buffer.write(struct.pack('i', size))
             self.output_buffer.write(chunk)
             self.output_buffer.write(struct.pack('i', size))
