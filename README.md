@@ -1,12 +1,14 @@
 # pyrepo
 
-A small Python 3 utility to handle several aspects of working with Arepo.
+A small Python utility to handle several aspects of working with Arepo.
 
 
 ## Features
 
 - Generation of initial conditions files
-    - [x] simple rectangular grid
+    - [x] Simple rectangular grid
+    - [ ] Check integrity of grid (no identical points)
+    - [ ] Check that no point exceeds the domain boundaries
 - Generation of parameter file
 - Abstract Arepo compilation
 - Wrapper for running Arepo
