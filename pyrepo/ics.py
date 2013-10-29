@@ -167,7 +167,6 @@ class ICWriter:
         # Write everything to file
         for chunk in chunks:
             size = len(chunk)
-            print size, chunk[:10], '...', chunk[-10:]
             self.output_buffer.write(struct.pack('i', size))
             self.output_buffer.write(chunk)
             self.output_buffer.write(struct.pack('i', size))
