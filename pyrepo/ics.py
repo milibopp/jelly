@@ -156,6 +156,7 @@ class ICWriter:
             ('fff', lambda c: c.position),
             ('fff', lambda c: c.velocity),
             ('I', lambda c: [c.cell_id]),
+            ('f', lambda c: [c.density]),
             ('f', lambda c: [c.internal_energy]),
             ('f', lambda c: [c.density]),
         ]
