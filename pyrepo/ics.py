@@ -41,95 +41,12 @@ integer (uint).
 
 '''
 
-from __future__ import division
-
-from abc import abstractmethod, ABCMeta
-from itertools import product
 import struct
 
-
-class VoronoiCell:
-    '''A moving-mesh hydrodynamics Voronoi cell.'''
-
-    def __init__(self, position, velocity, cell_id, density, internal_energy):
-        self.position = position
-        self.velocity = velocity
-        self.cell_id = cell_id
-        self.density = density
-        self.internal_energy = internal_energy
+from .model import ListCellCollection
 
 
-class Mesh:
-    '''
-    The mesh is simply a list of Voronoi cells that make up a Voronoi diagram.
-
-    '''
-
-    def __init__(self, cells, boxsize=1.0):
-        self.cells = cells
-        self.boxsize = boxsize
-
-
-class Mesh2D(Mesh):
-    '''
-    This is a particular type of mesh that restricts itself to only using the
-    xy-plane of the general three-dimensional space, in which a mesh is
-    embedded.
-
-    It provides a couple of factory methods to facilitate its creation.
-
-    '''
-
-    @classmethod
-    def rectangular(cls, p1, p2, nx, ny, frho=None, fvel=None, fu=None):
-        '''
-        Generates a 2D rectangular Cartesian mesh spanning from point *p1* to
-        *p2*. The grid is divided into *nx* and *ny* cells in each direction.
-
-        It uses the functions *frho*, *fvel* and *fu* to fix the hydrodynamic
-        quantities.
-
-        >>> grid = Mesh2D.rectangular((0.0, 0.0), (1.0, 1.0), 2, 2)
-        >>> grid.cells[0].position
-        (0.0, 0.0, 0.0)
-        >>> grid.cells[3].position
-        (0.5, 0.5, 0.0)
-        >>> grid.boxsize
-        1.0
-
-        '''
-        # Unpack
-        x1, y1 = p1
-        x2, y2 = p2
-        # Order
-        x1, x2 = min(x1, x2), max(x1, x2)
-        y1, y2 = min(y1, y2), max(y1, y2)
-        # Deltas
-        dx = x2 - x1
-        dy = y2 - y1
-        # Default functions
-        def unity(x, y, z):
-            return 1.0
-        def zerovector(x, y, z):
-            return 0.0, 0.0, 0.0
-        frho = frho or unity
-        fvel = fvel or zerovector
-        fu = fu or unity
-        # Create cells
-        cells = []
-        id_counter = 0
-        for kx, ky in product(range(nx), range(ny)):
-            pos = kx * dx / nx, ky * dy / ny, 0.0
-            vel = fvel(*pos)
-            rho = frho(*pos)
-            u = fu(*pos)
-            cells.append(VoronoiCell(pos, vel, id_counter, rho, u))
-            id_counter += 1
-        # Create mesh
-        return cls(cells, max(dx, dy))
-
-
-class ICWriter:
+class ICWriter(object):
 
     def __init__(self, output_buffer):
         self.output_buffer = output_buffer
@@ -137,7 +54,8 @@ class ICWriter:
     def write(self, mesh):
         '''Writes the given mesh to a file.'''
         # Total number of particles
-        N = len(mesh.cells)
+        cells = list(mesh.gas.cells)
+        N = len(cells)
         # Compile the header
         header_parts = [
             ('I' * 6, [N] + [0] * 5),   # Npart
@@ -153,17 +71,19 @@ class ICWriter:
         # Compile the body
         chunks = [header]
         block_specs = [
-            ('fff', lambda c: c.position),
-            ('fff', lambda c: c.velocity),
-            ('I', lambda c: [c.cell_id]),
-            ('f', lambda c: [c.density]),
-            ('f', lambda c: [c.internal_energy]),
-            ('f', lambda c: [c.density]),
+            ('fff', lambda c, i: c.position),
+            ('fff', lambda c, i: c.velocity),
+            ('I', lambda c, i: [i]),
+            ('f', lambda c, i: [c.density]),
+            ('f', lambda c, i: [c.internal_energy]),
+            ('f', lambda c, i: [c.density]),
         ]
         for fmt, getter in block_specs:
             body = bytearray()
-            for cell in mesh.cells:
-                body += struct.pack(fmt, *getter(cell))
+            gas_i = 0
+            for cell in cells:
+                body += struct.pack(fmt, *getter(cell, gas_i))
+                gas_i += 1
             chunks.append(body)
         # Write everything to file
         for chunk in chunks:
