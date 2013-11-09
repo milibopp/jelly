@@ -3,9 +3,12 @@ Concrete implementations of the abstraction model.
 
 '''
 
-from itertools import product
+from __future__ import division
 
-from .model import CellCollection, VoronoiCell
+from itertools import product
+from math import pi, sin, cos
+
+from .model import CellCollection, VoronoiCell, Obstacle
 
 
 class CartesianGrid2D(CellCollection):
@@ -93,3 +96,76 @@ class CartesianGrid2D(CellCollection):
 
         '''
         return self.__p1, self.__p2
+
+
+class CircularObstacle(Obstacle):
+    '''
+    A two-dimensional circular obstacle described by a center and radius.
+
+    '''
+
+    def __init__(self, center, radius, n_phi=100):
+        self.center = center
+        self.radius = radius
+        self.n_phi = n_phi
+
+    @property
+    def __angle_segment(self):
+        '''
+        The angular size of the tesselated segments making up the circle.
+
+        '''
+        return 2 * pi / self.n_phi
+
+    def __circle_position(self, k, inner):
+        '''
+        Calculate position of a cell on the circle using its running index and
+        whether it is the inner or outer circle.
+
+        '''
+        r = self.radius * (1 + 0.5 * self.__angle_segment * (-1 if inner else 1))
+        phi = (k + 0.5) * self.__angle_segment
+        return r * sin(phi) + self.center[0], r * cos(phi) + self.center[1], 0.0
+
+    @property
+    def solid_cells(self):
+        '''
+        The solid boundary cells of the circle.
+
+        >>> circle = CircularObstacle((0.0, 0.0), 1.0, 4)
+        >>> solid = list(circle.solid_cells)
+        >>> round(solid[0].position[0], 5)
+        0.15175
+
+        '''
+        for k in range(self.n_phi):
+            yield VoronoiCell(self.__circle_position(k, True), (0.0, 0.0, 0.0), 1.0, 1.0)
+
+    @property
+    def fluid_cells(self):
+        '''
+        The fluid boundary cells of the circle.
+
+        >>> circle = CircularObstacle((0.0, 0.0), 1.0, 4)
+        >>> fluid = list(circle.fluid_cells)
+        >>> round(fluid[0].position[0], 5)
+        1.26247
+
+        '''
+        for k in range(self.n_phi):
+            yield VoronoiCell(self.__circle_position(k, False), (0.0, 0.0, 0.0), 1.0, 1.0)
+
+    def inside(self, position):
+        '''
+        Checks whether a given position is inside the circle's domain.
+
+        >>> circle = CircularObstacle((0.0, 0.0), 1.0, 12)
+        >>> circle.inside((2.0, 0.0))
+        False
+        >>> circle.inside((0.0, 0.0))
+        True
+
+        '''
+        dist = sum((self.center[i] - position[i]) ** 2.0 for i in [0, 1]) ** 0.5
+        r_max = self.radius * (1 + 1.5 * self.__angle_segment)
+        return dist < r_max

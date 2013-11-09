@@ -128,6 +128,43 @@ class ListCellCollection(CellCollection):
         pass
 
 
+class Obstacle(object):
+    '''
+    This represents a solid obstacle within the simulation domain acting as an
+    arbitrarily shaped reflective boundary condition.
+
+    '''
+
+    __metaclass__ = ABCMeta
+
+    @abstractproperty
+    def solid_cells(self):
+        '''
+        A collection of the solid cells that make up the obstacle.
+
+        '''
+        pass
+
+    @abstractproperty
+    def fluid_cells(self):
+        '''
+        A collection of the fluid cells that surround the obstacle and move
+        along with it.
+
+        '''
+        pass
+
+    @abstractmethod
+    def inside(self, position):
+        '''
+        Determines whether a certain position is inside the obstacle's domain,
+        i.e. either within its solid or within the area designated for the
+        adjacent fluid cells.
+
+        '''
+        pass
+
+
 class Mesh(object):
     '''
     The mesh is the top-level object containing the information required to
