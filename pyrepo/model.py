@@ -170,8 +170,17 @@ class Mesh(object):
     The mesh is the top-level object containing the information required to
     describe an initial conditions file (or a snapshot).
 
+    >>> mesh = Mesh([1, 2], [3, 4], 3.0)
+    >>> mesh.gas
+    [1, 2]
+    >>> mesh.obstacles
+    [3, 4]
+    >>> mesh.boxsize
+    3.0
+
     '''
 
-    def __init__(self, gas, boxsize=1.0):
+    def __init__(self, gas, obstacles=None, boxsize=1.0):
         self.gas = gas
+        self.obstacles = obstacles or list()
         self.boxsize = boxsize
