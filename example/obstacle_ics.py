@@ -14,8 +14,8 @@ if __name__ == '__main__':
     rho = lambda x, y, z: 1.0
     v = lambda x, y, z: (0.0, 0.0, 0.0)
     u = lambda x, y, z: 1.0
-    grid = CartesianGrid2D((0, 0), (2, 2), 100, 100, rho, v, u)
-    circle = CircularObstacle((1, 1), 0.1, 100)
+    grid = CartesianGrid2D((0, 0), (2, 2), 100, 100, v, rho, u)
+    circle = CircularObstacle((1, 1), 0.1, v, rho, u, 100)
     mesh = Mesh(grid, [circle])
     # Write to file
     with open('test.dat', 'wb') as icfile:
