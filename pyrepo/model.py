@@ -214,3 +214,25 @@ class Mesh(object):
             for cell in self.__gas.cells
             if self.__outside_obstacles(cell)]
         return ListCellCollection(cells)
+
+    @property
+    def solid(self):
+        '''
+        The comprised solid cells of all obstacles.
+
+        '''
+        cells = []
+        for obstacle in self.obstacles:
+            cells.extend(obstacle.solid_cells)
+        return ListCellCollection(cells)
+
+    @property
+    def solid_neighbours(self):
+        '''
+        The fluid cells adjacent to the obstacles.
+
+        '''
+        cells = []
+        for obstacle in self.obstacles:
+            cells.extend(obstacle.fluid_cells)
+        return ListCellCollection(cells)
