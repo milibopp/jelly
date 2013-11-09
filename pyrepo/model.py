@@ -170,17 +170,47 @@ class Mesh(object):
     The mesh is the top-level object containing the information required to
     describe an initial conditions file (or a snapshot).
 
-    >>> mesh = Mesh([1, 2], [3, 4], 3.0)
-    >>> mesh.gas
-    [1, 2]
-    >>> mesh.obstacles
-    [3, 4]
-    >>> mesh.boxsize
-    3.0
+    To build it one requires a cell collection of some sort.
+
+    >>> from .util import CartesianGrid2D
+    >>> cells = CartesianGrid2D((0, 0), (1, 1), 10, 10)
+    >>> mesh = Mesh(cells)
+    >>> len(list(mesh.gas.cells))
+    100
+
+    One can optionally provide obstacles:
+
+    >>> from .util import CircularObstacle
+    >>> circle = CircularObstacle((0, 0), 0.15, 120)
+    >>> mesh = Mesh(cells, [circle])
+    >>> len(list(mesh.gas.cells))
+    96
 
     '''
 
     def __init__(self, gas, obstacles=None, boxsize=1.0):
-        self.gas = gas
+        self.__gas = gas
         self.obstacles = obstacles or list()
         self.boxsize = boxsize
+
+    def __outside_obstacles(self, cell):
+        '''
+        Tests, whether a given cell does intersect with any obstacle.
+
+        '''
+        for obstacle in self.obstacles:
+            if obstacle.inside(cell.position):
+                return False
+        return True
+
+    @property
+    def gas(self):
+        '''
+        The gas cells. This is computed dynamically excluding any cells
+        intersecting with the obstacles' domains.
+
+        '''
+        cells = [cell
+            for cell in self.__gas.cells
+            if self.__outside_obstacles(cell)]
+        return ListCellCollection(cells)
