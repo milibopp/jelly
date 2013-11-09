@@ -51,11 +51,23 @@ class ICWriter(object):
     def __init__(self, output_buffer):
         self.output_buffer = output_buffer
 
+    def __attribute_block(self, cells, fmt, getter):
+        """Builds a block based on simple attributes of the cells."""
+        block = bytearray()
+        for cell in cells:
+            block += struct.pack(fmt, *getter(cell))
+        return block
+
     def write(self, mesh):
         '''Writes the given mesh to a file.'''
         # Total number of particles
-        cells = list(mesh.gas.cells)
-        N = len(cells)
+        gas = list(mesh.gas.cells)
+        solid = list(mesh.solid.cells)
+        solid_neighbours = list(mesh.solid_neighbours.cells)
+        cells = gas + solid + solid_neighbours
+        N = len(gas) + len(solid) + len(solid_neighbours)
+        solid_min = 30000000
+        solidn_min = 40000000
         # Compile the header
         header_parts = [
             ('I' * 6, [N] + [0] * 5),   # Npart
@@ -70,21 +82,27 @@ class ICWriter(object):
         header = header + bytes('\x00') * (256 - len(header))
         # Compile the body
         chunks = [header]
-        block_specs = [
-            ('fff', lambda c, i: c.position),
-            ('fff', lambda c, i: c.velocity),
-            ('I', lambda c, i: [i]),
-            ('f', lambda c, i: [c.density]),
-            ('f', lambda c, i: [c.internal_energy]),
-            ('f', lambda c, i: [c.density]),
-        ]
-        for fmt, getter in block_specs:
-            body = bytearray()
-            gas_i = 0
-            for cell in cells:
-                body += struct.pack(fmt, *getter(cell, gas_i))
-                gas_i += 1
-            chunks.append(body)
+        # Position & velocity
+        chunks.append(self.__attribute_block(
+            cells, 'fff', lambda c: c.position))
+        chunks.append(self.__attribute_block(
+            cells, 'fff', lambda c: c.velocity))
+        # Special treatment to generate IDs
+        id_block = bytearray()
+        for i, cell in enumerate(gas):
+            id_block += struct.pack('I', i)
+        for i, cell in enumerate(solid):
+            id_block += struct.pack('I', i + solid_min)
+        for i, cell in enumerate(solid_neighbours):
+            id_block += struct.pack('I', i + solidn_min)
+        chunks.append(id_block)
+        # Density & internal energy
+        chunks.append(self.__attribute_block(
+            cells, 'f', lambda c: [c.density]))
+        chunks.append(self.__attribute_block(
+            cells, 'f', lambda c: [c.internal_energy]))
+        chunks.append(self.__attribute_block(
+            cells, 'f', lambda c: [c.density]))
         # Write everything to file
         for chunk in chunks:
             size = len(chunk)
