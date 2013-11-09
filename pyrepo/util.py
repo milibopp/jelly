@@ -25,13 +25,13 @@ class CartesianGrid2D(CellCollection):
 
     '''
 
-    def __init__(self, p1, p2, nx, ny, frho=None, fvel=None, fu=None):
+    def __init__(self, p1, p2, nx, ny, fvel=None, frho=None, fu=None):
         self.__p1 = p1
         self.__p2 = p2
         self.__nx = nx
         self.__ny = ny
-        self.__frho = frho
         self.__fvel = fvel
+        self.__frho = frho
         self.__fu = fu
 
     @property
@@ -101,12 +101,21 @@ class CartesianGrid2D(CellCollection):
 class CircularObstacle(Obstacle):
     '''
     A two-dimensional circular obstacle described by a center and radius.
+    Additionally, a `density_function` describing the density of the fluid
+    adjacent to the obstacle may be supplied. Similarly
+    `internal_energy_function` and `velocity_function` control their respective
+    quantities in the surrounding fluid. The resolution of the circle is
+    controlled via the parameter `n_phi`.
 
     '''
 
-    def __init__(self, center, radius, n_phi=100):
+    def __init__(self, center, radius, velocity_function=None,
+            density_function=None, internal_energy_function=None, n_phi=100):
         self.center = center
         self.radius = radius
+        self.density_function = density_function or (lambda x, y, z: 1.0)
+        self.internal_energy_function = internal_energy_function or (lambda x, y, z: 1.0)
+        self.velocity_function = velocity_function or (lambda x, y, z: (0.0, 0.0, 0.0))
         self.n_phi = n_phi
 
     @property
@@ -153,7 +162,11 @@ class CircularObstacle(Obstacle):
 
         '''
         for k in range(self.n_phi):
-            yield VoronoiCell(self.__circle_position(k, False), (0.0, 0.0, 0.0), 1.0, 1.0)
+            x = self.__circle_position(k, False)
+            v = self.velocity_function(*x)
+            rho = self.density_function(*x)
+            u = self.internal_energy_function(*x)
+            yield VoronoiCell(x, v, rho, u)
 
     def inside(self, position):
         '''
