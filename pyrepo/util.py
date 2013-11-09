@@ -66,7 +66,7 @@ class CartesianGrid2D(CellCollection):
         fu = self.__fu or unity
         # Yield cells
         for kx, ky in product(range(self.__nx), range(self.__ny)):
-            pos = kx * dx / self.__nx, ky * dy / self.__ny, 0.0
+            pos = (kx + 0.5) * dx / self.__nx, (ky + 0.5) * dy / self.__ny, 0.0
             vel = fvel(*pos)
             rho = frho(*pos)
             u = fu(*pos)
