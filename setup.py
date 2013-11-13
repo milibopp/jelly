@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-'''
-Setup script for pyrepo.
-
-'''
+"""Setup script for pyrepo."""
 
 from distutils.core import setup
 
