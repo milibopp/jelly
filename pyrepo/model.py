@@ -113,7 +113,7 @@ class ListCellCollection(CellCollection):
         >>> collection.check()
         Traceback (most recent call last):
             ...
-        pyrepo.model.InconsistentGridError: multiple cell position (0.0, 1.0, 2.0)
+        InconsistentGridError: multiple cell position (0.0, 1.0, 2.0)
 
         """
         positions = set()
