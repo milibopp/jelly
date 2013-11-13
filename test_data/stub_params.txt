@@ -1,0 +1,9 @@
+% Sample Arepo parameter file
+% This is incomplete and only serves for testing purposes
+InitCondFile  	./test.dat
+OutputDir       ./output
+
+EnergyFile      energy.txt
+InfoFile        info.txt
+TimingsFile     timings.txt
+CpuFile         cpu.txt
