@@ -8,7 +8,8 @@ specialize it for use with Arepo, only using one type of particle and one file.
 
 ### Header
 
-The header is a 256 bytes long zero-padded section at the beginning of the file.
+The header is a 256 bytes long zero-padded section at the beginning of the
+file.
 
 The following are the relevant quantities to be set. Integers are 4 bytes,
 floats are 8 bytes.
@@ -70,12 +71,13 @@ class ICWriter(object):
         solidn_min = 40000000
         # Compile the header
         header_parts = [
-            ('I' * 6, [N] + [0] * 5),   # Npart
-            ('d' * 6, [0.0] * 6),       # Massarr
-            ('ddii', [0.0, 0.0, 0, 0]), # Time, Redshift, FlagSfr, FlagFeedback
-            ('i' * 6, [N] + [0] * 5),   # Nall
-            ('ii', [0, 1]),             # FlagCooling, NumFiles
-            ('d', [mesh.boxsize])]      # BoxSize
+            ('I' * 6, [N] + [0] * 5),    # Npart
+            ('d' * 6, [0.0] * 6),        # Massarr
+            ('ddii', [0.0, 0.0, 0, 0]),  # Time, Redshift, FlagSfr,
+                                         # FlagFeedback
+            ('i' * 6, [N] + [0] * 5),    # Nall
+            ('ii', [0, 1]),              # FlagCooling, NumFiles
+            ('d', [mesh.boxsize])]       # BoxSize
         header = bytearray()
         for fmt, data in header_parts:
             header += struct.pack(fmt, *data)

@@ -211,8 +211,8 @@ class Mesh(object):
 
         """
         cells = [cell
-            for cell in self.__gas.cells
-            if self.__outside_obstacles(cell)]
+                 for cell in self.__gas.cells
+                 if self.__outside_obstacles(cell)]
         return ListCellCollection(cells)
 
     @property
