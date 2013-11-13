@@ -1,7 +1,7 @@
-'''
+"""
 Concrete implementations of the abstraction model.
 
-'''
+"""
 
 from __future__ import division
 
@@ -12,7 +12,7 @@ from .model import CellCollection, VoronoiCell, Obstacle
 
 
 class CartesianGrid2D(CellCollection):
-    '''
+    """
     A 2D rectangular Cartesian grid spanning from point *p1* to *p2*. The grid
     is divided into *nx* and *ny* cells in each direction.
 
@@ -23,7 +23,7 @@ class CartesianGrid2D(CellCollection):
 
     >>> grid = CartesianGrid2D((0.0, 0.0), (2.0, 3.0), 16, 24)
 
-    '''
+    """
 
     def __init__(self, p1, p2, nx, ny, fvel=None, frho=None, fu=None):
         self.__p1 = p1
@@ -36,7 +36,7 @@ class CartesianGrid2D(CellCollection):
 
     @property
     def cells(self):
-        '''
+        """
         Iterates over the cartesian grid.
 
         >>> grid = CartesianGrid2D((0.0, 0.0), (1.0, 1.0), 2, 2)
@@ -46,7 +46,7 @@ class CartesianGrid2D(CellCollection):
         >>> cells[3].position
         (0.5, 0.5, 0.0)
 
-        '''
+        """
         # Unpack
         x1, y1 = self.__p1
         x2, y2 = self.__p2
@@ -73,10 +73,10 @@ class CartesianGrid2D(CellCollection):
             yield VoronoiCell(pos, vel, rho, u)
 
     def check(self):
-        '''
+        """
         Do some self-consistency checks.
 
-        '''
+        """
         assert self.__n1 > 0
         assert self.__n2 > 0
         assert len(self.__p1) == 2
@@ -86,7 +86,7 @@ class CartesianGrid2D(CellCollection):
 
     @property
     def limits(self):
-        '''
+        """
         The limits of the grid. This is equivalent to the corresponding
         parameter supplied to the constructor.
 
@@ -94,12 +94,12 @@ class CartesianGrid2D(CellCollection):
         >>> grid.limits
         ((0.0, -1.0), (1.0, 2.0))
 
-        '''
+        """
         return self.__p1, self.__p2
 
 
 class CircularObstacle(Obstacle):
-    '''
+    """
     A two-dimensional circular obstacle described by a center and radius.
     Additionally, a `density_function` describing the density of the fluid
     adjacent to the obstacle may be supplied. Similarly
@@ -107,7 +107,7 @@ class CircularObstacle(Obstacle):
     quantities in the surrounding fluid. The resolution of the circle is
     controlled via the parameter `n_phi`.
 
-    '''
+    """
 
     def __init__(self, center, radius, velocity_function=None,
             density_function=None, internal_energy_function=None, n_phi=100):
@@ -120,25 +120,25 @@ class CircularObstacle(Obstacle):
 
     @property
     def __angle_segment(self):
-        '''
+        """
         The angular size of the tesselated segments making up the circle.
 
-        '''
+        """
         return 2 * pi / self.n_phi
 
     def __circle_position(self, k, inner):
-        '''
+        """
         Calculate position of a cell on the circle using its running index and
         whether it is the inner or outer circle.
 
-        '''
+        """
         r = self.radius * (1 + 0.5 * self.__angle_segment * (-1 if inner else 1))
         phi = (k + 0.5) * self.__angle_segment
         return r * sin(phi) + self.center[0], r * cos(phi) + self.center[1], 0.0
 
     @property
     def solid_cells(self):
-        '''
+        """
         The solid boundary cells of the circle.
 
         >>> circle = CircularObstacle((0.0, 0.0), 1.0, 4)
@@ -146,13 +146,13 @@ class CircularObstacle(Obstacle):
         >>> round(solid[0].position[0], 5)
         0.15175
 
-        '''
+        """
         for k in range(self.n_phi):
             yield VoronoiCell(self.__circle_position(k, True), (0.0, 0.0, 0.0), 1.0, 1.0)
 
     @property
     def fluid_cells(self):
-        '''
+        """
         The fluid boundary cells of the circle.
 
         >>> circle = CircularObstacle((0.0, 0.0), 1.0, 4)
@@ -160,7 +160,7 @@ class CircularObstacle(Obstacle):
         >>> round(fluid[0].position[0], 5)
         1.26247
 
-        '''
+        """
         for k in range(self.n_phi):
             x = self.__circle_position(k, False)
             v = self.velocity_function(*x)
@@ -169,7 +169,7 @@ class CircularObstacle(Obstacle):
             yield VoronoiCell(x, v, rho, u)
 
     def inside(self, position):
-        '''
+        """
         Checks whether a given position is inside the circle's domain.
 
         >>> circle = CircularObstacle((0.0, 0.0), 1.0, 12)
@@ -178,7 +178,7 @@ class CircularObstacle(Obstacle):
         >>> circle.inside((0.0, 0.0))
         True
 
-        '''
+        """
         dist = sum((self.center[i] - position[i]) ** 2.0 for i in [0, 1]) ** 0.5
         r_max = self.radius * (1 + 1.5 * self.__angle_segment)
         return dist < r_max

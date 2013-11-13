@@ -1,4 +1,4 @@
-'''
+"""
 Initial conditions generator for Arepo.
 
 ## File format
@@ -39,7 +39,7 @@ integer (uint).
 - u float[n] -- particle internal energies
 - rho float[n] -- particle densities
 
-'''
+"""
 
 import struct
 
@@ -59,7 +59,7 @@ class ICWriter(object):
         return block
 
     def write(self, mesh):
-        '''Writes the given mesh to a file.'''
+        """Writes the given mesh to a file."""
         # Total number of particles
         gas = list(mesh.gas.cells)
         solid = list(mesh.solid.cells)
