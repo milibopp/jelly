@@ -108,7 +108,8 @@ class CircularObstacle(Obstacle):
     """
 
     def __init__(self, center, radius, velocity_function=None,
-            density_function=None, internal_energy_function=None, n_phi=100):
+                 density_function=None, internal_energy_function=None,
+                 n_phi=100):
         self.center = center
         self.radius = radius
         self.density_function = density_function or (lambda x, y, z: 1.0)
