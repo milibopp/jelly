@@ -41,10 +41,10 @@ class CartesianGrid2D(CellCollection):
 
         >>> grid = CartesianGrid2D((0.0, 0.0), (1.0, 1.0), 2, 2)
         >>> cells = list(grid.cells)
-        >>> cells[0].position
-        (0.0, 0.0, 0.0)
+        >>> cells[1].position
+        (0.25, 0.75, 0.0)
         >>> cells[3].position
-        (0.5, 0.5, 0.0)
+        (0.75, 0.75, 0.0)
 
         """
         # Unpack
@@ -141,10 +141,12 @@ class CircularObstacle(Obstacle):
         """
         The solid boundary cells of the circle.
 
-        >>> circle = CircularObstacle((0.0, 0.0), 1.0, 4)
+        >>> circle = CircularObstacle((0.0, 0.0), 1.0, n_phi=100)
         >>> solid = list(circle.solid_cells)
         >>> round(solid[0].position[0], 5)
-        0.15175
+        0.03042
+        >>> round(solid[0].position[1], 5)
+        0.96811
 
         """
         for k in range(self.n_phi):
@@ -155,10 +157,12 @@ class CircularObstacle(Obstacle):
         """
         The fluid boundary cells of the circle.
 
-        >>> circle = CircularObstacle((0.0, 0.0), 1.0, 4)
+        >>> circle = CircularObstacle((0.0, 0.0), 1.0, n_phi=100)
         >>> fluid = list(circle.fluid_cells)
-        >>> round(fluid[0].position[0], 5)
-        1.26247
+        >>> round(fluid[25].position[0], 5)
+        1.03091
+        >>> round(fluid[25].position[1], 5)
+        -0.0324
 
         """
         for k in range(self.n_phi):
@@ -172,7 +176,7 @@ class CircularObstacle(Obstacle):
         """
         Checks whether a given position is inside the circle's domain.
 
-        >>> circle = CircularObstacle((0.0, 0.0), 1.0, 12)
+        >>> circle = CircularObstacle((0.0, 0.0), 1.0)
         >>> circle.inside((2.0, 0.0))
         False
         >>> circle.inside((0.0, 0.0))

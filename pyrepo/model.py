@@ -181,10 +181,10 @@ class Mesh(object):
     One can optionally provide obstacles:
 
     >>> from .util import CircularObstacle
-    >>> circle = CircularObstacle((0, 0), 0.15, 120)
+    >>> circle = CircularObstacle((0, 0), 0.15)
     >>> mesh = Mesh(cells, [circle])
     >>> len(list(mesh.gas.cells))
-    96
+    97
 
     """
 
