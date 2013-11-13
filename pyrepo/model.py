@@ -113,7 +113,7 @@ class ListCellCollection(CellCollection):
         >>> collection.check()
         Traceback (most recent call last):
             ...
-        InconsistentGridError: multiple cell position (0.0, 1.0, 2.0)
+        pyrepo.model.InconsistentGridError: multiple cell position (0.0, 1.0, 2.0)
 
         """
         positions = set()
@@ -181,10 +181,10 @@ class Mesh(object):
     One can optionally provide obstacles:
 
     >>> from .util import CircularObstacle
-    >>> circle = CircularObstacle((0, 0), 0.15, 120)
+    >>> circle = CircularObstacle((0, 0), 0.15)
     >>> mesh = Mesh(cells, [circle])
     >>> len(list(mesh.gas.cells))
-    96
+    97
 
     """
 
