@@ -57,10 +57,8 @@ class CartesianGrid2D(CellCollection):
         dx = x2 - x1
         dy = y2 - y1
         # Default functions
-        def unity(x, y, z):
-            return 1.0
-        def zerovector(x, y, z):
-            return 0.0, 0.0, 0.0
+        unity = lambda x, y, z: 1.0
+        zerovector = lambda x, y, z: (0.0, 0.0, 0.0)
         frho = self.__frho or unity
         fvel = self.__fvel or zerovector
         fu = self.__fu or unity
