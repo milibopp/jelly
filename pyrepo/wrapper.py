@@ -32,14 +32,14 @@ class ParameterSetup(object):
         pass
 
 
-class TextFileParameterSetup(object):
+class FileParameterSetup(object):
     r"""
     A simple text file implementation of the parameter abstraction. This is
     pretty similar to the standard behaviour of Arepo.
 
     It is initialized with some file path:
 
-    >>> params = TextFileParameterSetup('test_data/stub_params.txt')
+    >>> params = FileParameterSetup('test_data/stub_params.txt')
     >>> params.file_name
     'test_data/stub_params.txt'
     >>> params.content.split('\n')[0]
