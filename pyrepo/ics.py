@@ -49,8 +49,8 @@ from .model import ListCellCollection
 
 class ICWriter(object):
 
-    def __init__(self, output_buffer):
-        self.output_buffer = output_buffer
+    def __init__(self, file_name):
+        self.file_name = file_name
 
     def __attribute_block(self, cells, fmt, getter):
         """Builds a block based on simple attributes of the cells."""
@@ -106,8 +106,9 @@ class ICWriter(object):
         chunks.append(self.__attribute_block(
             cells, 'f', lambda c: [c.density]))
         # Write everything to file
-        for chunk in chunks:
-            size = len(chunk)
-            self.output_buffer.write(struct.pack('i', size))
-            self.output_buffer.write(chunk)
-            self.output_buffer.write(struct.pack('i', size))
+        with open(self.file_name, 'wb') as icfile:
+            for chunk in chunks:
+                size = len(chunk)
+                icfile.write(struct.pack('i', size))
+                icfile.write(chunk)
+                icfile.write(struct.pack('i', size))
