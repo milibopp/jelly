@@ -20,6 +20,7 @@ import subprocess
 import multiprocessing
 
 from .config import get_config
+from .ics import ICWriter
 
 
 __all__ = ['ArepoRun', 'ArepoInstallation', 'ParameterSetup', 'CompilerOptions']
@@ -75,6 +76,12 @@ class ParameterSetup(dict):
                     key, value = match
                     parameters[key] = value
         return parameters
+
+    def write(self, file_name):
+        """Writes the parameters to a file."""
+        with open(file_name, 'w') as param_file:
+            for key, value in self.iteritems():
+                param_file.write('{} {}\n'.format(key, value))
 
 
 class CompilerOptions(dict):
@@ -255,3 +262,20 @@ class ArepoRun(object):
         # Compile
         subprocess.call(['make', '-j{:d}'.format(self.proc_count)],
                         cwd=self.arepo.directory)
+
+    def run(self, parameters, initial_conditions):
+        """
+        Run the simulation with given parameter setup and initial conditions.
+
+        The initial conditions are automatically saved as the file specified in
+        the parameter `InitCondFile`.
+
+        """
+        # Write parameter file
+        pfile = 'pyrepo-params.txt'
+        parameters.write(pfile)
+        # Write initial conditions binary
+        ICWriter(parameters['InitCondFile']).write(initial_conditions)
+        # Run the simulation
+        subprocess.call(['mpirun', '-np', str(self.proc_count),
+            '.arepo/Arepo', pfile])
