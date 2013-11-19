@@ -13,49 +13,59 @@ running Arepo.
 
 """
 
-from abc import ABCMeta, abstractproperty, abstractmethod
 import re
 
 
-class ParameterSetup(object):
+class ParameterSetup(dict):
     """
     An abstraction of the Arepo parameter file. It may be provided procedurally
     from some object model or directly as a standard text file.
 
-    """
+    The typical format of Arepo parameter files is the following: there are a
+    number of key-value pairs separated by white space, line by line. There may
+    be empty lines, comments are denoted by "%".
 
-    __metaclass__ = ABCMeta
-
-    @abstractproperty
-    def content(self):
-        """The content of the parameter file as a string."""
-        pass
-
-
-class FileParameterSetup(object):
-    r"""
-    A simple text file implementation of the parameter abstraction. This is
-    pretty similar to the standard behaviour of Arepo.
-
-    It is initialized with some file path:
-
-    >>> params = FileParameterSetup('test_data/stub_params.txt')
-    >>> params.file_name
-    'test_data/stub_params.txt'
-    >>> params.content.split('\n')[0]
-    '% Sample Arepo parameter file'
+    This class is simply a dict with some additional methods.
 
     """
 
-    def __init__(self, file_name):
-        self.file_name = file_name
+    __regex_comment = r'^\s*%.*$'
+    __regex_value = r'^\s*(?P<option>\w+)\s*(?P<value>.*?)\s*(%.*)?$'
 
-    @property
-    def content(self):
-        """The content of the parameter file."""
-        with open(self.file_name) as textfile:
-            text = ''.join(line for line in textfile)
-        return text
+    @staticmethod
+    def _match_line(line):
+        """
+        Matches a line.
+
+        >>> ParameterSetup._match_line('OutputDir output/')
+        ('OutputDir', 'output/')
+
+        """
+        match = re.match(ParameterSetup.__regex_comment, line)
+        if match:
+            return
+        match = re.match(ParameterSetup.__regex_value, line)
+        if match:
+            return match.group('option'), match.group('value')
+
+    @classmethod
+    def from_file(cls, file_name):
+        """
+        Loads the parameter setup from a file.
+
+        >>> setup = ParameterSetup.from_file('test_data/stub_params.txt')
+        >>> setup['EnergyFile']
+        'energy.txt'
+
+        """
+        parameters = cls()
+        with open(file_name) as param_file:
+            for line in param_file:
+                match = cls._match_line(line)
+                if match:
+                    key, value = match
+                    parameters[key] = value
+        return parameters
 
 
 class CompilerOptions(dict):
