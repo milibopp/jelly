@@ -16,8 +16,13 @@ running Arepo.
 import re
 import os.path
 import shutil
+import subprocess
+import multiprocessing
 
 from .config import get_config
+
+
+__all__ = ['ArepoRun', 'ArepoInstallation', 'ParameterSetup', 'CompilerOptions']
 
 
 class ParameterSetup(dict):
@@ -129,7 +134,7 @@ class CompilerOptions(dict):
 
         >>> CompilerOptions.from_file('test_data/stub_config.sh')
         CompilerOptions({'PERIODIC': True, 'NTYPES': '6'})
-        
+
         """
         options = cls()
         with open(file_name) as cfg_file:
@@ -140,9 +145,17 @@ class CompilerOptions(dict):
                     options[key] = value
         return options
 
+    def write(self, file_name):
+        """Writes the options to a file."""
+        with open(file_name, 'w') as cfg_file:
+            for key, value in self.iteritems():
+                if value is True:
+                    cfg_file.write('{}\n'.format(key))
+                else:
+                    cfg_file.write('{}={}\n'.format(key, value))
+
     def __repr__(self):
         """
-
         >>> CompilerOptions(a=3, b=4)
         CompilerOptions({'a': 3, 'b': 4})
 
@@ -169,6 +182,20 @@ class ArepoInstallation(object):
         if not self.__check_dir():
             self.__create_dir()
 
+    def get_file(self, file_name):
+        """Get the path to a particular file in the Arepo directory."""
+        return os.path.join(self.directory, file_name)
+
+    @property
+    def config(self):
+        """The Config.sh file includes Arepo's compiler options."""
+        return self.get_file('Config.sh')
+
+    @property
+    def systype(self):
+        """The Makefile.systype file defines the type of system."""
+        return self.get_file('Makefile.systype')
+
     def __check_dir(self):
         """Checks if the local Arepo directory exists."""
         return os.path.isdir(self.directory)
@@ -191,6 +218,40 @@ class ArepoRun(object):
 
     """
 
-    def __init__(self, arepo, compiler_options):
+    def __init__(self, arepo, compiler_options, systype='Ubuntu',
+                 proc_count=None):
         self.arepo = arepo
         self.compiler_options = compiler_options
+        self.systype = systype
+        self.__proc_count = proc_count
+
+    @property
+    def proc_count(self):
+        """
+        The number of processes used for the compiling and running the
+        simulation. This defaults (value None) to the number of CPUs available
+        but it may also be set manually.
+
+        """
+        if self.__proc_count:
+            return self.__proc_count
+        try:
+            return multiprocessing.cpu_count()
+        except:
+            return 1
+
+    @proc_count.setter
+    def proc_count(self, value):
+        assert isinstance(value, int)
+        self.__proc_count = value
+
+    def compile(self):
+        """Compiles the Arepo software using its makefile."""
+        # Write compiler options
+        self.compiler_options.write(self.arepo.config)
+        # Set SYSTYPE variable
+        with open(self.arepo.systype, 'w') as msystype:
+            msystype.write('SYSTYPE="{}"'.format(self.systype))
+        # Compile
+        subprocess.call(['make', '-j{:d}'.format(self.proc_count)],
+                        cwd=self.arepo.directory)
