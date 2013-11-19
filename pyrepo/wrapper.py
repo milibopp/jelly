@@ -14,6 +14,10 @@ running Arepo.
 """
 
 import re
+import os.path
+import shutil
+
+from .config import get_config
 
 
 class ParameterSetup(dict):
@@ -144,3 +148,49 @@ class CompilerOptions(dict):
 
         """
         return '{}({})'.format(self.__class__.__name__, dict.__repr__(self))
+
+
+class ArepoInstallation(object):
+    """
+    An abstraction of the Arepo installation used. By default, a subfolder
+    `.arepo` is used in the current working directory. (This may be modified
+    using the configuration option `arepo-local`.) If this does not exist, it
+    is constructed by making a copy of the global Arepo installation folder.
+    (By default, `arepo-path=~/Arepo`)
+
+    Optionally, one can provide an argument to the constructor to specify a
+    custom Arepo folder to use.
+
+    """
+
+
+    def __init__(self, directory=None):
+        self.directory = directory or get_config('arepo-local')
+        if not self.__check_dir():
+            self.__create_dir()
+
+    def __check_dir(self):
+        """Checks if the local Arepo directory exists."""
+        return os.path.isdir(self.directory)
+
+    def __create_dir(self):
+        """Creates the local Arepo directory as a copy of the global one."""
+        src = os.path.expanduser(get_config('arepo-path'))
+        dest = self.directory
+        ignore_pattern = shutil.ignore_patterns(
+            '.*', 'data', 'jobscripts', 'tools', 'parameterfiles',
+            '*.txt', 'Doxyfile', 'Template-*', 'indent-*.sh')
+        shutil.copytree(src, dest, ignore=ignore_pattern)
+
+
+class ArepoRun(object):
+    """
+    An Arepo run. This class is used to handle preparational steps to be taken
+    before the simulation can be run and thereby interaction with the Arepo
+    working directory. Eventually it runs the simulation as a subprocess.
+
+    """
+
+    def __init__(self, arepo, compiler_options):
+        self.arepo = arepo
+        self.compiler_options = compiler_options
