@@ -15,7 +15,8 @@ def main():
         fname = 'test.dat'
     # Generate ICs
     mesh = Mesh(CartesianGrid2D((0.0, 0.0), (2.0, 2.0), 16, 16), boxsize=2.0)
-    ICWriter(open(fname, 'wb')).write(mesh)
+    writer = ICWriter(fname)
+    writer.write(mesh)
 
 
 if __name__ == '__main__':
