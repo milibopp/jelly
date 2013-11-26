@@ -15,8 +15,14 @@ from abc import ABCMeta, abstractproperty, abstractmethod
 class Cell(object):
     """
     A moving-mesh hydrodynamics Voronoi cell. This is the fundamental
-    component of the grid, once it is established. In principle, this can also
-    function as a more general particle.
+    component of the grid, once it is established.
+
+    In principle, this can also function as a more general particle. This is
+    what the `category` attribute is intended to cover. For instance, while the
+    default category is 'normal', cells making up solid obstacles are
+    categorized as 'solid'.
+
+    Usage:
 
     >>> cell = Cell((0, 1, -2), (-3, 7, 4), 6.2, 3.1)
     >>> cell.position
