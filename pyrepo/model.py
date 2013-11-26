@@ -52,9 +52,23 @@ class InconsistentGridError(Exception):
     pass
 
 
-class CellCollection(list):
+class CellCollection(object):
     """
-    A collection of cells.
+    Abstract base class for collections of cells. These should also
+    implement the iterator protocol to iterate over the cells.
+
+    """
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def check(self):
+        pass
+
+
+class ListCellCollection(list, CellCollection):
+    """
+    This implements the CellCollection as a simple list.
 
     """
 
@@ -65,14 +79,14 @@ class CellCollection(list):
 
         >>> cells = [Cell((0, 9, 2), (3, 4, 5), 1.1, 2.0),
         ...          Cell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
-        >>> collection = CellCollection(cells)
+        >>> collection = ListCellCollection(cells)
         >>> collection.check()
 
         For instance, identical positions are not allowed:
 
         >>> cells = [Cell((0, 1, 2), (3, 4, 5), 1.1, 2.0),
         ...          Cell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
-        >>> collection = CellCollection(cells)
+        >>> collection = ListCellCollection(cells)
         >>> collection.check()
         Traceback (most recent call last):
             ...

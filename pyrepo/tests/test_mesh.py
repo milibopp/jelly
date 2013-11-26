@@ -8,14 +8,20 @@ from pyrepo.model import *
 
 def make_some_cells():
     """Helper function to generate cells."""
-    return CellCollection(Cell((i * 0.1, 0), (0, 0), 1, 1) for i in range(40))
+    return ListCellCollection(Cell((i * 0.1, 0), (0, 0), 1, 1) for i in range(40))
 
 
 class CustomObstacle(Obstacle):
     """A custom obstacle that cuts off any cells with x < 1.5"""
 
+    def __iter__(self):
+        return iter([])
+
     def inside(self, position):
         return position[0] < 1.5
+
+    def check(self):
+        return True
 
 
 def test_plain_mesh():
