@@ -12,13 +12,13 @@ from __future__ import division
 from abc import ABCMeta, abstractproperty, abstractmethod
 
 
-class VoronoiCell(object):
+class Cell(object):
     """
     A moving-mesh hydrodynamics Voronoi cell. This is the fundamental
     component of the grid, once it is established. In principle, this can also
     function as a more general particle.
 
-    >>> cell = VoronoiCell((0, 1, -2), (-3, 7, 4), 6.2, 3.1)
+    >>> cell = Cell((0, 1, -2), (-3, 7, 4), 6.2, 3.1)
     >>> cell.position
     (0, 1, -2)
     >>> cell.velocity
@@ -81,7 +81,7 @@ class ListCellCollection(CellCollection):
     """
     This implements the cell collection using a simple list internally.
 
-    >>> cell = VoronoiCell((0, 1, 2), (3, 4, 5), 1.0, 2.0)
+    >>> cell = Cell((0, 1, 2), (3, 4, 5), 1.0, 2.0)
     >>> collection = ListCellCollection([cell])
     >>> assert collection.cells[0] is cell
 
@@ -100,15 +100,15 @@ class ListCellCollection(CellCollection):
         Do a self-consistency check. Should raise an exception upon
         encountering anomalies.
 
-        >>> cells = [VoronoiCell((0, 9, 2), (3, 4, 5), 1.1, 2.0),
-        ...          VoronoiCell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
+        >>> cells = [Cell((0, 9, 2), (3, 4, 5), 1.1, 2.0),
+        ...          Cell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
         >>> collection = ListCellCollection(cells)
         >>> collection.check()
 
         For instance, identical positions are not allowed:
 
-        >>> cells = [VoronoiCell((0, 1, 2), (3, 4, 5), 1.1, 2.0),
-        ...          VoronoiCell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
+        >>> cells = [Cell((0, 1, 2), (3, 4, 5), 1.1, 2.0),
+        ...          Cell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
         >>> collection = ListCellCollection(cells)
         >>> collection.check()
         Traceback (most recent call last):

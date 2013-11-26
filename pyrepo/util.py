@@ -8,7 +8,7 @@ from __future__ import division
 from itertools import product
 from math import pi, sin, cos
 
-from .model import CellCollection, VoronoiCell, Obstacle
+from .model import CellCollection, Cell, Obstacle
 
 
 class CartesianGrid2D(CellCollection):
@@ -68,7 +68,7 @@ class CartesianGrid2D(CellCollection):
             vel = fvel(*pos)
             rho = frho(*pos)
             u = fu(*pos)
-            yield VoronoiCell(pos, vel, rho, u)
+            yield Cell(pos, vel, rho, u)
 
     def check(self):
         """
@@ -149,7 +149,7 @@ class CircularObstacle(Obstacle):
 
         """
         for k in range(self.n_phi):
-            yield VoronoiCell(self.__circle_position(k, True), (0.0, 0.0, 0.0), 1.0, 1.0)
+            yield Cell(self.__circle_position(k, True), (0.0, 0.0, 0.0), 1.0, 1.0)
 
     @property
     def fluid_cells(self):
@@ -169,7 +169,7 @@ class CircularObstacle(Obstacle):
             v = self.velocity_function(*x)
             rho = self.density_function(*x)
             u = self.internal_energy_function(*x)
-            yield VoronoiCell(x, v, rho, u)
+            yield Cell(x, v, rho, u)
 
     def inside(self, position):
         """
