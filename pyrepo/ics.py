@@ -62,11 +62,11 @@ class ICWriter(object):
     def write(self, mesh):
         """Writes the given mesh to a file."""
         # Total number of particles
-        gas = list(mesh.gas.cells)
-        solid = list(mesh.solid.cells)
-        solid_neighbours = list(mesh.solid_neighbours.cells)
-        cells = gas + solid + solid_neighbours
-        N = len(gas) + len(solid) + len(solid_neighbours)
+        cells = list(mesh.cells)
+        gas = filter(lambda cell: cell.category == 'normal', cells)
+        solid = filter(lambda cell: cell.category == 'solid', cells)
+        solid_adjacent = filter(lambda cell: cell.category == 'solid_adjacent', cells)
+        N = len(cells)
         solid_min = 30000000
         solidn_min = 40000000
         # Compile the header
@@ -95,7 +95,7 @@ class ICWriter(object):
             id_block += struct.pack('I', i)
         for i, cell in enumerate(solid):
             id_block += struct.pack('I', i + solid_min)
-        for i, cell in enumerate(solid_neighbours):
+        for i, cell in enumerate(solid_adjacent):
             id_block += struct.pack('I', i + solidn_min)
         chunks.append(id_block)
         # Density & internal energy
