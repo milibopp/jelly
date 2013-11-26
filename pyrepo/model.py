@@ -27,14 +27,18 @@ class Cell(object):
     6.2
     >>> cell.internal_energy
     3.1
+    >>> cell.category
+    'normal'
 
     """
 
-    def __init__(self, position, velocity, density, internal_energy):
+    def __init__(self, position, velocity, density, internal_energy,
+                 category='normal'):
         self.position = position
         self.velocity = velocity
         self.density = density
         self.internal_energy = internal_energy
+        self.category = category
 
 
 class InconsistentGridError(Exception):
