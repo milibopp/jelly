@@ -71,10 +71,31 @@ def make_f77_block(raw_block, pad=None):
         return suffix + raw_block + suffix
 
 
-class BinaryBlock(object):
-    """A binary block of an initial conditions file."""
+def make_header(n_part, mass_arr, time, redshift, flag_sfr, flag_feedback,
+                n_all, flag_cooling, num_files, box_size):
+    """
+    Make a header block. This is a very thin wrapper around the Gadget-2 header
+    format. The parameters correspond directly to the parameters in the
+    specification found in the Gadget-2 manual.
+    
+    """
+    inner = bytearray()
+    inner += struct.pack('I' * 6, *n_part)
+    inner += struct.pack('d' * 6, *mass_arr)
+    inner += struct.pack('ddii', time, redshift, flag_sfr, flag_feedback)
+    inner += struct.pack('i' * 6, *n_all)
+    inner += struct.pack('iid', flag_cooling, num_files, box_size)
+    return make_f77_block(inner, 256)
 
-    __metaclass__ = ABCMeta
+
+def make_default_header(n_types, box_size=1.0, time=0.0, redshift=0.0,
+                        flag_sfr=0, flag_feedback=0, flag_cooling=0):
+    """Make a header with some reasonable default assumptions."""
+    mass_arr = (0.0,) * 6
+    num_files = 1
+    return make_header(n_types, mass_arr, time, redshift, flag_sfr,
+                       flag_feedback, n_types, flag_cooling, num_files,
+                       box_size)
 
 
 class ICWriter(object):

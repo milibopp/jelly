@@ -31,3 +31,34 @@ def test_make_f77_block_padded():
 def test_make_f77_block_padding_too_small():
     """F77-unformatted block with too small padding"""
     f77_block_padded = make_f77_block(bytes('blah'), 2)
+
+
+def test_make_header():
+    """Make a header block"""
+    header = make_header(
+        n_part=(100, 0, 0, 0, 0, 0),
+        mass_arr=(0.0,) * 6,
+        time=0.0,
+        redshift=0.0,
+        flag_sfr=0,
+        flag_feedback=0,
+        n_all=(100, 0, 0, 0, 0, 0),
+        flag_cooling=0,
+        num_files=1,
+        box_size=1.0
+    )
+    assert_equal(header[4:8], '\x64' + '\x00' * 3)
+    assert_equal(header[8:28], '\x00' * 20)
+    assert_equal(header[100:104], '\x64' + '\x00' * 3)
+    assert_equal(header[128:132], '\x01' + '\x00' * 3)
+    assert_equal(len(header), 264)
+
+
+def test_make_default_header():
+    """Make a default header block"""
+    header = make_default_header((100, 0, 0, 4, 0, 0), 1.0, 0.0)
+    assert_equal(header[4:8], '\x64' + '\x00' * 3)
+    assert_equal(header[16:20], '\x04' + '\x00' * 3)
+    assert_equal(header[100:104], '\x64' + '\x00' * 3)
+    assert_equal(header[128:132], '\x01' + '\x00' * 3)
+    assert_equal(len(header), 264)
