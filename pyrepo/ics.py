@@ -43,8 +43,38 @@ integer (uint).
 """
 
 import struct
+from abc import ABCMeta
 
 from .model import ListCellCollection
+
+
+def make_f77_block(raw_block, pad=None):
+    """
+    Make an F77-unformatted block out of raw binary data.
+
+    If `pad` is set, the block is padded with zeros to the specified size in
+    bytes excluding the suffixes.
+
+    :param raw_block: raw binary data
+    :param pad: zero-padded size of the block
+
+    """
+    size = len(raw_block)
+    if pad:
+        suffix = struct.pack('i', pad)
+        if pad < size:
+            raise ValueError('padding too small for data')
+        padding = '\x00' * (pad - size)
+        return suffix + raw_block + padding + suffix
+    else:
+        suffix = struct.pack('i', size)
+        return suffix + raw_block + suffix
+
+
+class BinaryBlock(object):
+    """A binary block of an initial conditions file."""
+
+    __metaclass__ = ABCMeta
 
 
 class ICWriter(object):
@@ -112,3 +142,23 @@ class ICWriter(object):
                 icfile.write(struct.pack('i', size))
                 icfile.write(chunk)
                 icfile.write(struct.pack('i', size))
+
+
+class ICFileHeader(object):
+    """The header of an IC file. This is a helper object of the IC writer."""
+    pass
+
+
+def write_icfile(file_name, mesh):
+    """Writes an initial conditions file."""
+    # Generate header and body of the file
+    header = ICFileHeader(mesh)
+    body = ICFileBody(mesh)
+    # Write to file
+    with open(file_name, 'wb') as icfile:
+        for block in [header.binary, body.position, body.velocity, body.ids,
+                      body.density, body.internal_energy, body.density]:
+            size = len(block)
+            icfile.write(struct.pack('i', size))
+            icfile.write(block)
+            icfile.write(struct.pack('i', size))
