@@ -62,3 +62,22 @@ def test_make_default_header():
     assert_equal(header[100:104], '\x64' + '\x00' * 3)
     assert_equal(header[128:132], '\x01' + '\x00' * 3)
     assert_equal(len(header), 264)
+
+
+def test_body_block_vector():
+    """Vectorial body block"""
+    data = [(0, 0, 0), (1, 0, 0), (2, -1, 0)]
+    fmt = 'ddd'
+    body = make_body(fmt, data)
+    assert_equal(body[:4], struct.pack('i', 72))
+    assert_equal(body[4:12], struct.pack('d', 0))
+    assert_equal(body[52:60], struct.pack('d', 2))
+
+
+def test_body_block_scalar():
+    """Scalar body block"""
+    data = [1, 7, 8, -4]
+    fmt = 'i'
+    body = make_body(fmt, data)
+    assert_equal(body[:4], struct.pack('i', 16))
+    assert_equal(body[8:12], struct.pack('i', 7))

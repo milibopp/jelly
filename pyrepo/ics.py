@@ -98,6 +98,28 @@ def make_default_header(n_types, box_size=1.0, time=0.0, redshift=0.0,
                        box_size)
 
 
+def make_body(fmt, data):
+    """
+    Produces a body block. The format determines whether the data is treated as
+    an iterable of actual values or as an iterable of tuple-like objects to be
+    unpacked for binary formatting.
+
+    :param fmt: format string for individual data
+    :param data: iterable data
+    :return: F77-unformatted binary block of the data
+    :rtype: bytearray
+
+    """
+    inner = bytearray()
+    if len(fmt) == 1:
+        for datum in data:
+            inner += struct.pack(fmt, datum)
+    else:
+        for datum in data:
+            inner += struct.pack(fmt, *datum)
+    return make_f77_block(inner)
+
+
 class ICWriter(object):
 
     def __init__(self, file_name):
@@ -163,11 +185,6 @@ class ICWriter(object):
                 icfile.write(struct.pack('i', size))
                 icfile.write(chunk)
                 icfile.write(struct.pack('i', size))
-
-
-class ICFileHeader(object):
-    """The header of an IC file. This is a helper object of the IC writer."""
-    pass
 
 
 def write_icfile(file_name, mesh):
