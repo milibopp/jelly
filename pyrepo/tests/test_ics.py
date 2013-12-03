@@ -8,6 +8,8 @@ from nose.tools import assert_equal, raises
 
 from pyrepo.ics import *
 from pyrepo.model import Cell, Mesh
+from pyrepo.util import CartesianGrid2D, CircularObstacle
+from .test_model import _random_mesh
 
 
 def test_make_f77_block():
@@ -82,3 +84,26 @@ def test_body_block_scalar():
     body = make_body(fmt, data)
     assert_equal(body[:4], struct.pack('i', 16))
     assert_equal(body[8:12], struct.pack('i', 7))
+
+
+def test_iterate_ids_simple():
+    """Generate IDs for plain mesh"""
+    id_iter = iterate_ids(_random_mesh())
+    assert_equal(list(id_iter), range(10))
+
+
+def test_iterate_ids_obstacle():
+    """Generate IDs for mesh with obstacle"""
+    # Fixture
+    grid = CartesianGrid2D((0, 0), (2, 2), 10, 10)
+    circle = CircularObstacle((1, 1), 0.2, n_phi=12)
+    mesh = Mesh(grid, [circle])
+    ids = list(iterate_ids(mesh))
+    # All cells inside mesh have IDs >= 30000000
+    for id_, cell in zip(ids, mesh.cells):
+        if circle.inside(cell.position):
+            assert id_ >= 30000000
+    # Total numbers of cells with certain ID ranges
+    assert_equal(len(filter(lambda id_: 40000000 > id_ >= 30000000, ids)), 12)
+    assert_equal(len(filter(lambda id_: id_ >= 40000000, ids)), 12)
+    assert_equal(len(filter(lambda id_: id_ < 30000000, ids)), 88)

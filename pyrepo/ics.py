@@ -120,6 +120,17 @@ def make_body(fmt, data):
     return make_f77_block(inner)
 
 
+def iterate_ids(mesh):
+    """Iterates over the computed IDs of a given mesh"""
+    counter = {
+        'normal': 0,
+        'solid': int(3e7),
+        'solid_adjacent': int(4e7)}
+    for category in mesh.quantity_iterator('category'):
+        yield counter[category]
+        counter[category] += 1
+
+
 class ICWriter(object):
 
     def __init__(self, file_name):
