@@ -8,7 +8,7 @@ from __future__ import division
 from itertools import product
 from math import pi, sin, cos
 
-from .model import CellCollection, VoronoiCell, Obstacle
+from .model import CellCollection, Cell, Obstacle
 
 
 class CartesianGrid2D(CellCollection):
@@ -34,17 +34,14 @@ class CartesianGrid2D(CellCollection):
         self.__frho = frho
         self.__fu = fu
 
-    @property
-    def cells(self):
+    def __iter__(self):
         """
         Iterates over the cartesian grid.
 
         >>> grid = CartesianGrid2D((0.0, 0.0), (1.0, 1.0), 2, 2)
-        >>> cells = list(grid.cells)
-        >>> cells[1].position
-        (0.25, 0.75, 0.0)
-        >>> cells[3].position
-        (0.75, 0.75, 0.0)
+        >>> positions = map(lambda c: c.position, grid)
+        >>> assert (0.25, 0.75, 0.0) in positions
+        >>> assert (0.75, 0.75, 0.0) in positions
 
         """
         # Unpack
@@ -68,7 +65,7 @@ class CartesianGrid2D(CellCollection):
             vel = fvel(*pos)
             rho = frho(*pos)
             u = fu(*pos)
-            yield VoronoiCell(pos, vel, rho, u)
+            yield Cell(pos, vel, rho, u)
 
     def check(self):
         """
@@ -81,19 +78,6 @@ class CartesianGrid2D(CellCollection):
         assert len(self.__p2) == 2
         for p1, p2 in zip(self.__p1, self.__p2):
             assert p1 < p2
-
-    @property
-    def limits(self):
-        """
-        The limits of the grid. This is equivalent to the corresponding
-        parameter supplied to the constructor.
-
-        >>> grid = CartesianGrid2D((0.0, -1.0), (1.0, 2.0), 16, 16)
-        >>> grid.limits
-        ((0.0, -1.0), (1.0, 2.0))
-
-        """
-        return self.__p1, self.__p2
 
 
 class CircularObstacle(Obstacle):
@@ -135,41 +119,17 @@ class CircularObstacle(Obstacle):
         phi = (k + 0.5) * self.__angle_segment
         return r * sin(phi) + self.center[0], r * cos(phi) + self.center[1], 0.0
 
-    @property
-    def solid_cells(self):
-        """
-        The solid boundary cells of the circle.
-
-        >>> circle = CircularObstacle((0.0, 0.0), 1.0, n_phi=100)
-        >>> solid = list(circle.solid_cells)
-        >>> round(solid[0].position[0], 5)
-        0.03042
-        >>> round(solid[0].position[1], 5)
-        0.96811
-
-        """
-        for k in range(self.n_phi):
-            yield VoronoiCell(self.__circle_position(k, True), (0.0, 0.0, 0.0), 1.0, 1.0)
-
-    @property
-    def fluid_cells(self):
-        """
-        The fluid boundary cells of the circle.
-
-        >>> circle = CircularObstacle((0.0, 0.0), 1.0, n_phi=100)
-        >>> fluid = list(circle.fluid_cells)
-        >>> round(fluid[25].position[0], 5)
-        1.03091
-        >>> round(fluid[25].position[1], 5)
-        -0.0324
-
-        """
+    def __iter__(self):
+        """Iterates over all cells making up the obstacle."""
+        # TODO: test this properly
         for k in range(self.n_phi):
             x = self.__circle_position(k, False)
             v = self.velocity_function(*x)
             rho = self.density_function(*x)
             u = self.internal_energy_function(*x)
-            yield VoronoiCell(x, v, rho, u)
+            yield Cell(x, v, rho, u, category='solid_adjacent')
+            yield Cell(self.__circle_position(k, True), (0.0, 0.0, 0.0), 1.0,
+                       1.0, category='solid')
 
     def inside(self, position):
         """
@@ -185,3 +145,9 @@ class CircularObstacle(Obstacle):
         dist = sum((self.center[i] - position[i]) ** 2.0 for i in [0, 1]) ** 0.5
         r_max = self.radius * (1 + 1.5 * self.__angle_segment)
         return dist < r_max
+
+    def check(self):
+        """Some sanity checks."""
+        assert self.radius > 0
+        assert type(n_phi) is int
+        assert n_phi > 0

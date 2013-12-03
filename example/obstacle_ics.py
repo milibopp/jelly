@@ -4,7 +4,7 @@ center and exports this as initial conditions.
 
 """
 
-from pyrepo.ics import ICWriter
+from pyrepo.ics import write_icfile
 from pyrepo.model import Mesh
 from pyrepo.util import CartesianGrid2D, CircularObstacle
 
@@ -19,5 +19,4 @@ if __name__ == '__main__':
     mesh = Mesh(grid, [circle])
     # Write to file
     with open('test.dat', 'wb') as icfile:
-        writer = ICWriter(icfile)
-        writer.write(mesh)
+        write_icfile(icfile, mesh)

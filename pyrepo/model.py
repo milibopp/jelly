@@ -10,15 +10,23 @@ cell's coordinates, solid objects used for special boundaries etc.
 
 from __future__ import division
 from abc import ABCMeta, abstractproperty, abstractmethod
+from itertools import imap
+from operator import attrgetter
 
 
-class VoronoiCell(object):
+class Cell(object):
     """
     A moving-mesh hydrodynamics Voronoi cell. This is the fundamental
-    component of the grid, once it is established. In principle, this can also
-    function as a more general particle.
+    component of the grid, once it is established.
 
-    >>> cell = VoronoiCell((0, 1, -2), (-3, 7, 4), 6.2, 3.1)
+    In principle, this can also function as a more general particle. This is
+    what the `category` attribute is intended to cover. For instance, while the
+    default category is 'normal', cells making up solid obstacles are
+    categorized as 'solid'.
+
+    Usage:
+
+    >>> cell = Cell((0, 1, -2), (-3, 7, 4), 6.2, 3.1)
     >>> cell.position
     (0, 1, -2)
     >>> cell.velocity
@@ -27,14 +35,18 @@ class VoronoiCell(object):
     6.2
     >>> cell.internal_energy
     3.1
+    >>> cell.category
+    'normal'
 
     """
 
-    def __init__(self, position, velocity, density, internal_energy):
+    def __init__(self, position, velocity, density, internal_energy,
+                 category='normal'):
         self.position = position
         self.velocity = velocity
         self.density = density
         self.internal_energy = internal_energy
+        self.category = category
 
 
 class InconsistentGridError(Exception):
@@ -44,71 +56,38 @@ class InconsistentGridError(Exception):
 
 class CellCollection(object):
     """
-    A collection of cells.
+    Abstract base class for collections of cells. These should also
+    implement the iterator protocol to iterate over the cells.
 
     """
 
     __metaclass__ = ABCMeta
 
-    @abstractproperty
-    def cells(self):
-        """
-        Returns a collection or an iterable containing the cells.
-
-        """
-        pass
-
     @abstractmethod
     def check(self):
-        """
-        Do a self-consistency check. Should raise an exception upon
-        encountering anomalies.
-
-        """
-        pass
-
-    @abstractproperty
-    def limits(self):
-        """
-        The limits of this collection. This should be two tuples describing the
-        minimum and maximum coordinates on each axis.
-
-        """
         pass
 
 
-class ListCellCollection(CellCollection):
+class ListCellCollection(list, CellCollection):
     """
-    This implements the cell collection using a simple list internally.
-
-    >>> cell = VoronoiCell((0, 1, 2), (3, 4, 5), 1.0, 2.0)
-    >>> collection = ListCellCollection([cell])
-    >>> assert collection.cells[0] is cell
+    This implements the CellCollection as a simple list.
 
     """
-
-    def __init__(self, cells=None):
-        self.__cells = list(cells) if cells else list()
-
-    @property
-    def cells(self):
-        """The list of cells in the collection."""
-        return self.__cells
 
     def check(self):
         """
         Do a self-consistency check. Should raise an exception upon
         encountering anomalies.
 
-        >>> cells = [VoronoiCell((0, 9, 2), (3, 4, 5), 1.1, 2.0),
-        ...          VoronoiCell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
+        >>> cells = [Cell((0, 9, 2), (3, 4, 5), 1.1, 2.0),
+        ...          Cell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
         >>> collection = ListCellCollection(cells)
         >>> collection.check()
 
         For instance, identical positions are not allowed:
 
-        >>> cells = [VoronoiCell((0, 1, 2), (3, 4, 5), 1.1, 2.0),
-        ...          VoronoiCell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
+        >>> cells = [Cell((0, 1, 2), (3, 4, 5), 1.1, 2.0),
+        ...          Cell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
         >>> collection = ListCellCollection(cells)
         >>> collection.check()
         Traceback (most recent call last):
@@ -117,18 +96,14 @@ class ListCellCollection(CellCollection):
 
         """
         positions = set()
-        for cell in self.__cells:
+        for cell in self:
             pos = tuple(float(x) for x in cell.position[:3])
             if pos in positions:
                 raise InconsistentGridError('multiple cell position {}'.format(pos))
             positions.add(pos)
 
-    @property
-    def limits(self):
-        pass
 
-
-class Obstacle(object):
+class Obstacle(CellCollection):
     """
     This represents a solid obstacle within the simulation domain acting as an
     arbitrarily shaped reflective boundary condition.
@@ -136,23 +111,6 @@ class Obstacle(object):
     """
 
     __metaclass__ = ABCMeta
-
-    @abstractproperty
-    def solid_cells(self):
-        """
-        A collection of the solid cells that make up the obstacle.
-
-        """
-        pass
-
-    @abstractproperty
-    def fluid_cells(self):
-        """
-        A collection of the fluid cells that surround the obstacle and move
-        along with it.
-
-        """
-        pass
 
     @abstractmethod
     def inside(self, position):
@@ -170,26 +128,10 @@ class Mesh(object):
     The mesh is the top-level object containing the information required to
     describe an initial conditions file (or a snapshot).
 
-    To build it one requires a cell collection of some sort.
-
-    >>> from .util import CartesianGrid2D
-    >>> cells = CartesianGrid2D((0, 0), (1, 1), 10, 10)
-    >>> mesh = Mesh(cells)
-    >>> len(list(mesh.gas.cells))
-    100
-
-    One can optionally provide obstacles:
-
-    >>> from .util import CircularObstacle
-    >>> circle = CircularObstacle((0, 0), 0.15)
-    >>> mesh = Mesh(cells, [circle])
-    >>> len(list(mesh.gas.cells))
-    97
-
     """
 
     def __init__(self, gas, obstacles=None, boxsize=1.0):
-        self.__gas = gas
+        self.gas = gas
         self.obstacles = obstacles or list()
         self.boxsize = boxsize
 
@@ -204,35 +146,20 @@ class Mesh(object):
         return True
 
     @property
-    def gas(self):
+    def cells(self):
         """
-        The gas cells. This is computed dynamically excluding any cells
-        intersecting with the obstacles' domains.
+        All cells of this mesh. This basically wraps up all gas (dynamically
+        excluding everything inside some obstacle) and the cells making up
+        obstacles.
 
         """
-        cells = [cell
-                 for cell in self.__gas.cells
-                 if self.__outside_obstacles(cell)]
-        return ListCellCollection(cells)
-
-    @property
-    def solid(self):
-        """
-        The comprised solid cells of all obstacles.
-
-        """
-        cells = []
+        for cell in self.gas:
+            if self.__outside_obstacles(cell):
+                yield cell
         for obstacle in self.obstacles:
-            cells.extend(obstacle.solid_cells)
-        return ListCellCollection(cells)
+            for cell in obstacle:
+                yield cell
 
-    @property
-    def solid_neighbours(self):
-        """
-        The fluid cells adjacent to the obstacles.
-
-        """
-        cells = []
-        for obstacle in self.obstacles:
-            cells.extend(obstacle.fluid_cells)
-        return ListCellCollection(cells)
+    def quantity_iterator(self, attribute):
+        """An iterable of all cell quantities by attribute"""
+        return imap(attrgetter(attribute), self.cells)
