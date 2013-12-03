@@ -5,8 +5,13 @@ Tests of initial conditions file output.
 
 import struct
 from nose.tools import assert_equal, raises
+import random
+from collections import namedtuple
+from operator import attrgetter
+from itertools import imap
 
 from pyrepo.ics import *
+from pyrepo.model import Cell, Mesh
 
 
 def test_make_f77_block():
@@ -81,3 +86,35 @@ def test_body_block_scalar():
     body = make_body(fmt, data)
     assert_equal(body[:4], struct.pack('i', 16))
     assert_equal(body[8:12], struct.pack('i', 7))
+
+
+def _random_mesh():
+    """
+    Generate a random mesh for testing purposes
+    
+    """
+    def rnd_tuple(n):
+        return tuple(random.uniform(0, 1) for _ in range(n))
+    def rnd_cell(category='normal'):
+        pos = rnd_tuple(3)
+        vel = rnd_tuple(3)
+        rho = random.uniform(0, 1)
+        u = random.uniform(0, 1)
+        return Cell(pos, vel, rho, u, category)
+    cells = ListCellCollection(rnd_cell() for _ in range(10))
+    return Mesh(cells)
+
+
+def test_mesh_conversion():
+    """Convert mesh into IC file data structure"""
+    mesh = _random_mesh()
+    # Implement
+    icmesh_cls = namedtuple('ICMesh',
+        ['header', 'position', 'velocity', 'id', 'density', 'internal_energy'])
+    def ICMesh(mesh):
+        cells = list(mesh.cells)
+        position = map(attrgetter('position'), cells)
+        return icmesh_cls(0, position, 0, 0, 0, 0)
+    icmesh = ICMesh(mesh)
+    # Assert
+    assert 0 <= icmesh.position[0][0] <= 10
