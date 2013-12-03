@@ -5,6 +5,8 @@ Tests of initial conditions file output.
 
 import struct
 from nose.tools import assert_equal, raises
+from tempfile import NamedTemporaryFile
+from hashlib import md5
 
 from pyrepo.ics import *
 from pyrepo.model import Cell, Mesh
@@ -92,18 +94,48 @@ def test_iterate_ids_simple():
     assert_equal(list(id_iter), range(10))
 
 
+def _mesh_with_obstacle():
+    """Generate a mesh with obstacles for testing"""
+    grid = CartesianGrid2D((0, 0), (2, 2), 10, 10)
+    circle = CircularObstacle((1, 1), 0.2, n_phi=12)
+    return Mesh(grid, [circle])
+
+
 def test_iterate_ids_obstacle():
     """Generate IDs for mesh with obstacle"""
     # Fixture
-    grid = CartesianGrid2D((0, 0), (2, 2), 10, 10)
-    circle = CircularObstacle((1, 1), 0.2, n_phi=12)
-    mesh = Mesh(grid, [circle])
+    mesh = _mesh_with_obstacle()
     ids = list(iterate_ids(mesh))
     # All cells inside mesh have IDs >= 30000000
     for id_, cell in zip(ids, mesh.cells):
-        if circle.inside(cell.position):
+        if mesh.obstacles[0].inside(cell.position):
             assert id_ >= 30000000
     # Total numbers of cells with certain ID ranges
     assert_equal(len(filter(lambda id_: 40000000 > id_ >= 30000000, ids)), 12)
     assert_equal(len(filter(lambda id_: id_ >= 40000000, ids)), 12)
     assert_equal(len(filter(lambda id_: id_ < 30000000, ids)), 88)
+
+
+def test_write_ics_md5():
+    """
+    Write initial conditions
+
+    Note: this is implemented by comparing the MD5 hash of the output file to
+    some fixed value determined at some point. This test is suboptimal, since
+    the structure of the file may vary under changes of the implementation,
+    though it is still a valid file.
+    
+    In case the internal structure has to be changed, the fixed MD5 hash in
+    this function has to change, too.
+
+    """
+    # Create a mesh
+    mesh = _mesh_with_obstacle()
+    # Write initial conditions to a temporary file
+    with NamedTemporaryFile() as tmpfile:
+        fname = tmpfile.name
+    ICWriter(fname).write(mesh)
+    # Create MD5 hash and check it
+    with open(fname, 'rb') as tmpfile:
+        output_hash = md5(tmpfile.read()).hexdigest()
+    assert_equal(output_hash, '77ddb92ff1dfaaaa3cd41c0fa4105cb4')
