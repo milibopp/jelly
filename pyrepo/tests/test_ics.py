@@ -134,8 +134,9 @@ def test_write_ics_md5():
     # Write initial conditions to a temporary file
     with NamedTemporaryFile() as tmpfile:
         fname = tmpfile.name
-    ICWriter(fname).write(mesh)
+    with open(fname, 'wb') as tmpfile:
+        write_icfile(tmpfile, mesh)
     # Create MD5 hash and check it
     with open(fname, 'rb') as tmpfile:
         output_hash = md5(tmpfile.read()).hexdigest()
-    assert_equal(output_hash, '77ddb92ff1dfaaaa3cd41c0fa4105cb4')
+    assert_equal(output_hash, '8e48389d423399613169580528502d7a')

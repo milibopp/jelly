@@ -124,90 +124,20 @@ def iterate_ids(mesh):
     """Iterates over the computed IDs of a given mesh"""
     counter = {
         'normal': 0,
-        'solid': int(3e7),
-        'solid_adjacent': int(4e7)}
+        'solid': 30000000,
+        'solid_adjacent': 40000000}
     for category in mesh.quantity_iterator('category'):
         yield counter[category]
         counter[category] += 1
 
 
-class ICWriter(object):
-
-    def __init__(self, file_name):
-        self.file_name = file_name
-
-    def __attribute_block(self, cells, fmt, getter):
-        """Builds a block based on simple attributes of the cells."""
-        block = bytearray()
-        for cell in cells:
-            block += struct.pack(fmt, *getter(cell))
-        return block
-
-    def write(self, mesh):
-        """Writes the given mesh to a file."""
-        # Total number of particles
-        cells = list(mesh.cells)
-        gas = filter(lambda cell: cell.category == 'normal', cells)
-        solid = filter(lambda cell: cell.category == 'solid', cells)
-        solid_adjacent = filter(lambda cell: cell.category == 'solid_adjacent', cells)
-        N = len(cells)
-        solid_min = 30000000
-        solidn_min = 40000000
-        # Compile the header
-        header_parts = [
-            ('I' * 6, [N] + [0] * 5),    # Npart
-            ('d' * 6, [0.0] * 6),        # Massarr
-            ('ddii', [0.0, 0.0, 0, 0]),  # Time, Redshift, FlagSfr,
-                                         # FlagFeedback
-            ('i' * 6, [N] + [0] * 5),    # Nall
-            ('ii', [0, 1]),              # FlagCooling, NumFiles
-            ('d', [mesh.boxsize])]       # BoxSize
-        header = bytearray()
-        for fmt, data in header_parts:
-            header += struct.pack(fmt, *data)
-        header = header + bytes('\x00') * (256 - len(header))
-        # Compile the body
-        chunks = [header]
-        # Position & velocity
-        chunks.append(self.__attribute_block(
-            cells, 'fff', lambda c: c.position))
-        chunks.append(self.__attribute_block(
-            cells, 'fff', lambda c: c.velocity))
-        # Special treatment to generate IDs
-        id_block = bytearray()
-        for i, cell in enumerate(gas):
-            id_block += struct.pack('I', i)
-        for i, cell in enumerate(solid):
-            id_block += struct.pack('I', i + solid_min)
-        for i, cell in enumerate(solid_adjacent):
-            id_block += struct.pack('I', i + solidn_min)
-        chunks.append(id_block)
-        # Density & internal energy
-        chunks.append(self.__attribute_block(
-            cells, 'f', lambda c: [c.density]))
-        chunks.append(self.__attribute_block(
-            cells, 'f', lambda c: [c.internal_energy]))
-        chunks.append(self.__attribute_block(
-            cells, 'f', lambda c: [c.density]))
-        # Write everything to file
-        with open(self.file_name, 'wb') as icfile:
-            for chunk in chunks:
-                size = len(chunk)
-                icfile.write(struct.pack('i', size))
-                icfile.write(chunk)
-                icfile.write(struct.pack('i', size))
-
-
-def write_icfile(file_name, mesh):
-    """Writes an initial conditions file."""
-    # Generate header and body of the file
-    header = ICFileHeader(mesh)
-    body = ICFileBody(mesh)
-    # Write to file
-    with open(file_name, 'wb') as icfile:
-        for block in [header.binary, body.position, body.velocity, body.ids,
-                      body.density, body.internal_energy, body.density]:
-            size = len(block)
-            icfile.write(struct.pack('i', size))
-            icfile.write(block)
-            icfile.write(struct.pack('i', size))
+def write_icfile(file_like, mesh):
+    """Write an initial conditions file"""
+    ntypes = [len(list(mesh.cells))] + [0] * 5
+    file_like.write(make_default_header(ntypes, mesh.boxsize))
+    file_like.write(make_body('fff', mesh.quantity_iterator('position')))
+    file_like.write(make_body('fff', mesh.quantity_iterator('velocity')))
+    file_like.write(make_body('I', iterate_ids(mesh)))
+    file_like.write(make_body('f', mesh.quantity_iterator('density')))
+    file_like.write(make_body('f', mesh.quantity_iterator('internal_energy')))
+    file_like.write(make_body('f', mesh.quantity_iterator('density')))

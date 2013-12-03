@@ -20,7 +20,7 @@ import subprocess
 import multiprocessing
 
 from .config import get_config
-from .ics import ICWriter
+from .ics import write_icfile
 
 
 __all__ = ['ArepoRun', 'ArepoInstallation', 'ParameterSetup', 'CompilerOptions']
@@ -275,7 +275,8 @@ class ArepoRun(object):
         pfile = 'pyrepo-params.txt'
         parameters.write(pfile)
         # Write initial conditions binary
-        ICWriter(parameters['InitCondFile']).write(initial_conditions)
+        with open(parameters['InitCondFile'], 'wb') as icfile:
+            write_icfile(icfile, initial_conditions)
         # Run the simulation
         subprocess.call(['mpirun', '-np', str(self.proc_count),
             '.arepo/Arepo', pfile])
