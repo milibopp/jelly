@@ -91,30 +91,46 @@ def test_body_block_scalar():
 def _random_mesh():
     """
     Generate a random mesh for testing purposes
-    
+
     """
     def rnd_tuple(n):
         return tuple(random.uniform(0, 1) for _ in range(n))
+
     def rnd_cell(category='normal'):
         pos = rnd_tuple(3)
         vel = rnd_tuple(3)
         rho = random.uniform(0, 1)
         u = random.uniform(0, 1)
         return Cell(pos, vel, rho, u, category)
+
     cells = ListCellCollection(rnd_cell() for _ in range(10))
     return Mesh(cells)
+
+
+def get_positions(mesh):
+    """Obtain an iterable of the cell positions"""
+    return imap(attrgetter('position'), mesh.cells)
+
+
+def test_iterate_position():
+    """Iterate positions in mesh"""
+    mesh = _random_mesh()
+    positions = get_positions(mesh)
+    assert_equal(next(positions), next(mesh.cells).position)
 
 
 def test_mesh_conversion():
     """Convert mesh into IC file data structure"""
     mesh = _random_mesh()
     # Implement
-    icmesh_cls = namedtuple('ICMesh',
+    icmesh_cls = namedtuple(
+        'ICMesh',
         ['header', 'position', 'velocity', 'id', 'density', 'internal_energy'])
+
     def ICMesh(mesh):
-        cells = list(mesh.cells)
-        position = map(attrgetter('position'), cells)
+        position = get_positions(mesh)
         return icmesh_cls(0, position, 0, 0, 0, 0)
+
     icmesh = ICMesh(mesh)
     # Assert
-    assert 0 <= icmesh.position[0][0] <= 10
+    assert 0 <= next(icmesh.position)[0] <= 10
