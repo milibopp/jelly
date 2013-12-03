@@ -26,8 +26,8 @@ def _random_mesh():
     return Mesh(cells)
 
 
-def test_iterate_position():
+def test_iterate_quantity():
     """Iterate positions in mesh"""
     mesh = _random_mesh()
-    assert_equal(next(mesh.positions), next(mesh.cells).position)
-    assert 0 <= next(mesh.positions)[0] <= 10
+    assert_equal(next(mesh.quantity_iterator('position')), next(mesh.cells).position)
+    assert 0 <= next(mesh.quantity_iterator('position'))[0] <= 1

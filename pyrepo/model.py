@@ -160,7 +160,6 @@ class Mesh(object):
             for cell in obstacle:
                 yield cell
 
-    @property
-    def positions(self):
-        """An iterable of all cell positions"""
-        return imap(attrgetter('position'), self.cells)
+    def quantity_iterator(self, attribute):
+        """An iterable of all cell quantities by attribute"""
+        return imap(attrgetter(attribute), self.cells)
