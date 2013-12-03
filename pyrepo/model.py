@@ -10,6 +10,8 @@ cell's coordinates, solid objects used for special boundaries etc.
 
 from __future__ import division
 from abc import ABCMeta, abstractproperty, abstractmethod
+from itertools import imap
+from operator import attrgetter
 
 
 class Cell(object):
@@ -157,3 +159,8 @@ class Mesh(object):
         for obstacle in self.obstacles:
             for cell in obstacle:
                 yield cell
+
+    @property
+    def positions(self):
+        """An iterable of all cell positions"""
+        return imap(attrgetter('position'), self.cells)
