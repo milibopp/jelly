@@ -4,6 +4,7 @@ from nose.tools import assert_equal, raises
 import random
 from collections import namedtuple
 
+from pyrepo.util import CartesianGrid2D
 from pyrepo.model import *
 
 
@@ -31,3 +32,12 @@ def test_iterate_quantity():
     mesh = _random_mesh()
     assert_equal(next(mesh.quantity_iterator('position')), next(mesh.cells).position)
     assert 0 <= next(mesh.quantity_iterator('position'))[0] <= 1
+
+
+def test_extra_objects():
+    """Add additional cell collections to the mesh"""
+    nbody_cell = Cell((0, 0, 0), (0, 0, 0), 1.0, 1.0, 'nbody')
+    coll = ListCellCollection([nbody_cell])
+    mesh = Mesh(CartesianGrid2D((-2.0, -2.0), (2.0, 2.0), 32, 32), extras=[coll])
+    cells = list(mesh.cells)
+    assert_equal(sum(1 for cell in cells if cell.category == 'nbody'), 1)

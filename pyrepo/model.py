@@ -130,9 +130,10 @@ class Mesh(object):
 
     """
 
-    def __init__(self, gas, obstacles=None, boxsize=1.0):
+    def __init__(self, gas, obstacles=None, extras=None, boxsize=1.0):
         self.gas = gas
         self.obstacles = obstacles or list()
+        self.extras = extras or list()
         self.boxsize = boxsize
 
     def __outside_obstacles(self, cell):
@@ -158,6 +159,9 @@ class Mesh(object):
                 yield cell
         for obstacle in self.obstacles:
             for cell in obstacle:
+                yield cell
+        for extra in self.extras:
+            for cell in extra:
                 yield cell
 
     def quantity_iterator(self, attribute):
