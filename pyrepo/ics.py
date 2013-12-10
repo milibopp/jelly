@@ -131,6 +131,18 @@ def iterate_ids(mesh):
         counter[category] += 1
 
 
+def get_type_of_cell(cell):
+    """
+    Determine the type of a cell
+
+    """
+    if cell.category in ['normal', 'solid', 'solid_adjacent']:
+        return 0
+    elif cell.category == 'nbody':
+        return 4
+    raise ValueError('cell has invalid category')
+
+
 def count_types(cells):
     """
     Count the cell types in a mesh
@@ -140,10 +152,7 @@ def count_types(cells):
     """
     ntypes = [0] * 6
     for cell in cells:
-        if cell.category in ['normal', 'solid', 'solid_adjacent']:
-            ntypes[0] += 1
-        elif cell.category == 'nbody':
-            ntypes[4] += 1
+        ntypes[get_type_of_cell(cell)] += 1
     return ntypes
 
 
