@@ -131,7 +131,7 @@ def iterate_ids(mesh):
         counter[category] += 1
 
 
-def count_types(mesh):
+def count_types(cells):
     """
     Count the cell types in a mesh
 
@@ -139,7 +139,7 @@ def count_types(mesh):
 
     """
     ntypes = [0] * 6
-    for cell in mesh.cells:
+    for cell in cells:
         if cell.category in ['normal', 'solid', 'solid_adjacent']:
             ntypes[0] += 1
         elif cell.category == 'nbody':
@@ -149,7 +149,11 @@ def count_types(mesh):
 
 def write_icfile(file_like, mesh):
     """Write an initial conditions file"""
-    ntypes = [len(list(mesh.cells))] + [0] * 5
+    # Do the iteration once
+    # TODO: This should be handled in a file to decrease its memory footprint
+    # for large grids
+    cells = list(mesh.cells)
+    ntypes = count_types(cells)
     file_like.write(make_default_header(ntypes, mesh.boxsize))
     file_like.write(make_body('fff', mesh.quantity_iterator('position')))
     file_like.write(make_body('fff', mesh.quantity_iterator('velocity')))

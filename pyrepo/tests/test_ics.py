@@ -119,7 +119,7 @@ def test_iterate_ids_obstacle():
 def test_count_types():
     """Count the cell types in a mesh"""
     mesh = make_mesh_with_nbody_cell(10)
-    assert_equal(count_types(mesh), [100, 0, 0, 0, 1, 0])
+    assert_equal(count_types(mesh.cells), [100, 0, 0, 0, 1, 0])
 
 
 def test_write_ics_md5():
