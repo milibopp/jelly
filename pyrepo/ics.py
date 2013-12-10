@@ -131,6 +131,22 @@ def iterate_ids(mesh):
         counter[category] += 1
 
 
+def count_types(mesh):
+    """
+    Count the cell types in a mesh
+
+    :mesh: The mesh to be counted
+
+    """
+    ntypes = [0] * 6
+    for cell in mesh.cells:
+        if cell.category in ['normal', 'solid', 'solid_adjacent']:
+            ntypes[0] += 1
+        elif cell.category == 'nbody':
+            ntypes[4] += 1
+    return ntypes
+
+
 def write_icfile(file_like, mesh):
     """Write an initial conditions file"""
     ntypes = [len(list(mesh.cells))] + [0] * 5

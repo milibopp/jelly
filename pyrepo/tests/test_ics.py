@@ -11,7 +11,7 @@ from hashlib import md5
 from pyrepo.ics import *
 from pyrepo.model import Cell, Mesh
 from pyrepo.util import CartesianGrid2D, CircularObstacle
-from .test_model import _random_mesh
+from .test_model import _random_mesh, make_mesh_with_nbody_cell
 
 
 def test_make_f77_block():
@@ -114,6 +114,12 @@ def test_iterate_ids_obstacle():
     assert_equal(len(filter(lambda id_: 40000000 > id_ >= 30000000, ids)), 12)
     assert_equal(len(filter(lambda id_: id_ >= 40000000, ids)), 12)
     assert_equal(len(filter(lambda id_: id_ < 30000000, ids)), 88)
+
+
+def test_count_types():
+    """Count the cell types in a mesh"""
+    mesh = make_mesh_with_nbody_cell(10)
+    assert_equal(count_types(mesh), [100, 0, 0, 0, 1, 0])
 
 
 def test_write_ics_md5():

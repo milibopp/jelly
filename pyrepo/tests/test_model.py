@@ -34,10 +34,20 @@ def test_iterate_quantity():
     assert 0 <= next(mesh.quantity_iterator('position'))[0] <= 1
 
 
+def make_mesh_with_nbody_cell(gridres=32):
+    """
+    Create amesh with an N-body cell
+
+    :gridres: Resolution of the background gas grid
+
+    """
+    nbody_cell = Cell((0, 0, 0), (0, 0, 0), 1.0, 1.0, 'nbody')
+    return Mesh(CartesianGrid2D((-2.0, -2.0), (2.0, 2.0), gridres, gridres),
+        extras=[ListCellCollection([nbody_cell])])
+
+
 def test_extra_objects():
     """Add additional cell collections to the mesh"""
-    nbody_cell = Cell((0, 0, 0), (0, 0, 0), 1.0, 1.0, 'nbody')
-    coll = ListCellCollection([nbody_cell])
-    mesh = Mesh(CartesianGrid2D((-2.0, -2.0), (2.0, 2.0), 32, 32), extras=[coll])
+    mesh = make_mesh_with_nbody_cell()
     cells = list(mesh.cells)
     assert_equal(sum(1 for cell in cells if cell.category == 'nbody'), 1)
