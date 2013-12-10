@@ -77,7 +77,7 @@ def make_header(n_part, mass_arr, time, redshift, flag_sfr, flag_feedback,
     Make a header block. This is a very thin wrapper around the Gadget-2 header
     format. The parameters correspond directly to the parameters in the
     specification found in the Gadget-2 manual.
-    
+
     """
     inner = bytearray()
     inner += struct.pack('I' * 6, *n_part)

@@ -124,7 +124,7 @@ def test_write_ics_md5():
     some fixed value determined at some point. This test is suboptimal, since
     the structure of the file may vary under changes of the implementation,
     though it is still a valid file.
-    
+
     In case the internal structure has to be changed, the fixed MD5 hash in
     this function has to change, too.
 
