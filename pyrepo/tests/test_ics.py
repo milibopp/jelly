@@ -90,7 +90,7 @@ def test_body_block_scalar():
 
 def test_iterate_ids_simple():
     """Generate IDs for plain mesh"""
-    id_iter = iterate_ids(_random_mesh())
+    id_iter = iterate_ids(_random_mesh().cells)
     assert_equal(list(id_iter), range(10))
 
 
@@ -105,7 +105,7 @@ def test_iterate_ids_obstacle():
     """Generate IDs for mesh with obstacle"""
     # Fixture
     mesh = _mesh_with_obstacle()
-    ids = list(iterate_ids(mesh))
+    ids = list(iterate_ids(mesh.cells))
     # All cells inside mesh have IDs >= 30000000
     for id_, cell in zip(ids, mesh.cells):
         if mesh.obstacles[0].inside(cell.position):
@@ -119,24 +119,24 @@ def test_iterate_ids_obstacle():
 def test_count_types():
     """Count the cell types in a mesh"""
     mesh = make_mesh_with_nbody_cell(10)
+    ntypes = count_types(mesh.cells)
     assert_equal(count_types(mesh.cells), [100, 0, 0, 0, 1, 0])
+    assert_equal(sum(ntypes), len(list(mesh.cells)))
 
 
-def test_write_ics_md5():
+def _hash_write(mesh):
     """
-    Write initial conditions
+    Hash the file output of a initial conditions write
 
-    Note: this is implemented by comparing the MD5 hash of the output file to
-    some fixed value determined at some point. This test is suboptimal, since
-    the structure of the file may vary under changes of the implementation,
-    though it is still a valid file.
+    This is used to compare the MD5 hash of the output file to some fixed value
+    determined at some point. This test is suboptimal, since the structure of
+    the file may vary under changes of the implementation, though it is still a
+    valid file.
 
-    In case the internal structure has to be changed, the fixed MD5 hash in
-    this function has to change, too.
+    In case the internal structure has to be changed, the fixed MD5 hash
+    expected by the test has to be changed accordingly.
 
     """
-    # Create a mesh
-    mesh = _mesh_with_obstacle()
     # Write initial conditions to a temporary file
     with NamedTemporaryFile() as tmpfile:
         fname = tmpfile.name
@@ -145,4 +145,26 @@ def test_write_ics_md5():
     # Create MD5 hash and check it
     with open(fname, 'rb') as tmpfile:
         output_hash = md5(tmpfile.read()).hexdigest()
+    return output_hash
+
+
+def test_write_ics_md5():
+    """Write initial conditions"""
+    mesh = _mesh_with_obstacle()
+    output_hash = _hash_write(mesh)
     assert_equal(output_hash, '8e48389d423399613169580528502d7a')
+
+
+def test_iterate_ids_with_nbody():
+    """Iterate over IDs of mesh N-body particle"""
+    mesh = make_mesh_with_nbody_cell(10)
+    ids = list(iterate_ids(mesh.cells))
+    assert_equal(len(ids), 101)
+    assert_equal(ids, range(101))
+
+
+def test_write_ics_with_nbody_md5():
+    """Write initial conditions with N-body particle"""
+    mesh = make_mesh_with_nbody_cell(10)
+    output_hash = _hash_write(mesh)
+    assert_equal(output_hash, 'ec079813bbe690cf64f0c03fc55cfaac')
