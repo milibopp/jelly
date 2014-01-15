@@ -56,6 +56,11 @@ def test_abs():
     assert_equal(abs(Vector(3.0, 4.0)), 5.0)
 
 
+def test_unit():
+    """Unit vector"""
+    assert_equal(Vector(-4.0, 3.0).unit(), Vector(-0.8, 0.6))
+
+
 def test_dot():
     """Dot product of two vectors"""
     assert_equal(dot(Vector(3.0, 2.0), Vector(2.0, -1.0)), 4.0)
