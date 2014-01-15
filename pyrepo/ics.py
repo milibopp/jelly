@@ -44,6 +44,8 @@ integer (uint).
 
 import struct
 from abc import ABCMeta
+from itertools import imap
+from operator import attrgetter
 
 from .model import ListCellCollection
 
@@ -77,7 +79,7 @@ def make_header(n_part, mass_arr, time, redshift, flag_sfr, flag_feedback,
     Make a header block. This is a very thin wrapper around the Gadget-2 header
     format. The parameters correspond directly to the parameters in the
     specification found in the Gadget-2 manual.
-    
+
     """
     inner = bytearray()
     inner += struct.pack('I' * 6, *n_part)
@@ -120,24 +122,65 @@ def make_body(fmt, data):
     return make_f77_block(inner)
 
 
-def iterate_ids(mesh):
+def iterate_ids(cells):
     """Iterates over the computed IDs of a given mesh"""
     counter = {
         'normal': 0,
         'solid': 30000000,
         'solid_adjacent': 40000000}
-    for category in mesh.quantity_iterator('category'):
+    for category in map_quantity(cells, 'category'):
+        if category == 'nbody':
+            category = 'normal' # Evil hack, fix this!
         yield counter[category]
         counter[category] += 1
 
 
+def get_type_of_cell(cell):
+    """
+    Determine the type of a cell
+
+    """
+    if cell.category in ['normal', 'solid', 'solid_adjacent']:
+        return 0
+    elif cell.category == 'nbody':
+        return 4
+    raise ValueError('cell has invalid category')
+
+
+def count_types(cells):
+    """
+    Count the cell types in a mesh
+
+    :mesh: The mesh to be counted
+
+    """
+    ntypes = [0] * 6
+    for cell in cells:
+        ntypes[get_type_of_cell(cell)] += 1
+    return ntypes
+
+
+def map_quantity(cells, attribute):
+    """
+    Map a list of cells to a list of its quantities
+
+    The quantities are specified by the attribute name.
+
+    """
+    return imap(attrgetter(attribute), cells)
+
+
 def write_icfile(file_like, mesh):
     """Write an initial conditions file"""
-    ntypes = [len(list(mesh.cells))] + [0] * 5
+    # Do the iteration once
+    # TODO: This should be handled in a file to decrease its memory footprint
+    # for large grids
+    cells = sorted(mesh.cells, key=get_type_of_cell)
+    ntypes = count_types(cells)
     file_like.write(make_default_header(ntypes, mesh.boxsize))
-    file_like.write(make_body('fff', mesh.quantity_iterator('position')))
-    file_like.write(make_body('fff', mesh.quantity_iterator('velocity')))
-    file_like.write(make_body('I', iterate_ids(mesh)))
-    file_like.write(make_body('f', mesh.quantity_iterator('density')))
-    file_like.write(make_body('f', mesh.quantity_iterator('internal_energy')))
-    file_like.write(make_body('f', mesh.quantity_iterator('density')))
+    file_like.write(make_body('fff', map_quantity(cells, 'position')))
+    file_like.write(make_body('fff', map_quantity(cells, 'velocity')))
+    file_like.write(make_body('I', iterate_ids(cells)))
+    file_like.write(make_body('f', map_quantity(cells, 'density')))
+    file_like.write(make_body('f', map_quantity(cells[:ntypes[0]], 'internal_energy')))
+    file_like.write(make_body('f', map_quantity(cells[:ntypes[0]], 'density')))

@@ -10,8 +10,6 @@ cell's coordinates, solid objects used for special boundaries etc.
 
 from __future__ import division
 from abc import ABCMeta, abstractproperty, abstractmethod
-from itertools import imap
-from operator import attrgetter
 
 
 class Cell(object):
@@ -130,9 +128,10 @@ class Mesh(object):
 
     """
 
-    def __init__(self, gas, obstacles=None, boxsize=1.0):
+    def __init__(self, gas, obstacles=None, extras=None, boxsize=1.0):
         self.gas = gas
         self.obstacles = obstacles or list()
+        self.extras = extras or list()
         self.boxsize = boxsize
 
     def __outside_obstacles(self, cell):
@@ -159,7 +158,6 @@ class Mesh(object):
         for obstacle in self.obstacles:
             for cell in obstacle:
                 yield cell
-
-    def quantity_iterator(self, attribute):
-        """An iterable of all cell quantities by attribute"""
-        return imap(attrgetter(attribute), self.cells)
+        for extra in self.extras:
+            for cell in extra:
+                yield cell

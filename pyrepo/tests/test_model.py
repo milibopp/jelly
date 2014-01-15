@@ -4,6 +4,7 @@ from nose.tools import assert_equal, raises
 import random
 from collections import namedtuple
 
+from pyrepo.util import CartesianGrid2D
 from pyrepo.model import *
 
 
@@ -26,8 +27,20 @@ def _random_mesh():
     return Mesh(cells)
 
 
-def test_iterate_quantity():
-    """Iterate positions in mesh"""
-    mesh = _random_mesh()
-    assert_equal(next(mesh.quantity_iterator('position')), next(mesh.cells).position)
-    assert 0 <= next(mesh.quantity_iterator('position'))[0] <= 1
+def make_mesh_with_nbody_cell(gridres=32):
+    """
+    Create amesh with an N-body cell
+
+    :gridres: Resolution of the background gas grid
+
+    """
+    nbody_cell = Cell((0, 0, 0), (0, 0, 0), 2.0, 2.0, 'nbody')
+    return Mesh(CartesianGrid2D((-2.0, -2.0), (2.0, 2.0), gridres, gridres),
+        extras=[ListCellCollection([nbody_cell])])
+
+
+def test_extra_objects():
+    """Add additional cell collections to the mesh"""
+    mesh = make_mesh_with_nbody_cell()
+    cells = list(mesh.cells)
+    assert_equal(sum(1 for cell in cells if cell.category == 'nbody'), 1)
