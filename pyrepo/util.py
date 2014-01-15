@@ -54,17 +54,17 @@ class CartesianGrid2D(CellCollection):
         dx = x2 - x1
         dy = y2 - y1
         # Default functions
-        unity = lambda x, y, z: 1.0
-        zerovector = lambda x, y, z: (0.0, 0.0, 0.0)
+        unity = lambda x: 1.0
+        zerovector = lambda x: (0.0, 0.0, 0.0)
         frho = self.__frho or unity
         fvel = self.__fvel or zerovector
         fu = self.__fu or unity
         # Yield cells
         for kx, ky in product(range(self.__nx), range(self.__ny)):
             pos = (kx + 0.5) * dx / self.__nx, (ky + 0.5) * dy / self.__ny, 0.0
-            vel = fvel(*pos)
-            rho = frho(*pos)
-            u = fu(*pos)
+            vel = fvel(pos)
+            rho = frho(pos)
+            u = fu(pos)
             yield Cell(pos, vel, rho, u)
 
     def check(self):
@@ -96,9 +96,9 @@ class CircularObstacle(Obstacle):
                  n_phi=100):
         self.center = center
         self.radius = radius
-        self.density_function = density_function or (lambda x, y, z: 1.0)
-        self.internal_energy_function = internal_energy_function or (lambda x, y, z: 1.0)
-        self.velocity_function = velocity_function or (lambda x, y, z: (0.0, 0.0, 0.0))
+        self.density_function = density_function or (lambda x: 1.0)
+        self.internal_energy_function = internal_energy_function or (lambda x: 1.0)
+        self.velocity_function = velocity_function or (lambda x: (0.0, 0.0, 0.0))
         self.n_phi = n_phi
 
     @property
@@ -124,9 +124,9 @@ class CircularObstacle(Obstacle):
         # TODO: test this properly
         for k in range(self.n_phi):
             x = self.__circle_position(k, False)
-            v = self.velocity_function(*x)
-            rho = self.density_function(*x)
-            u = self.internal_energy_function(*x)
+            v = self.velocity_function(x)
+            rho = self.density_function(x)
+            u = self.internal_energy_function(x)
             yield Cell(x, v, rho, u, category='solid_adjacent')
             yield Cell(self.__circle_position(k, True), (0.0, 0.0, 0.0), 1.0,
                        1.0, category='solid')
