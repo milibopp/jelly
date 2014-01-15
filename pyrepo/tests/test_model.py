@@ -39,7 +39,7 @@ def make_mesh_with_nbody_cell(gridres=32):
     return Mesh(
         CartesianGrid2D(
             Rectangle(Vector(-2.0, -2.0), Vector(4.0, 4.0)),
-            gridres, gridres),
+            (gridres, gridres)),
         extras=[ListCellCollection([nbody_cell])])
 
 

@@ -97,7 +97,7 @@ def test_iterate_ids_simple():
 
 def _mesh_with_obstacle():
     """Generate a mesh with obstacles for testing"""
-    grid = CartesianGrid2D(Rectangle(Vector(0, 0), Vector(2, 2)), 10, 10)
+    grid = CartesianGrid2D(Rectangle(Vector(0, 0), Vector(2, 2)), (10, 10))
     circle = CircularObstacle((1, 1), 0.2, n_phi=12)
     return Mesh(grid, [circle])
 

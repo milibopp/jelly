@@ -18,36 +18,26 @@ Rectangle = namedtuple('Rectangle', ['position', 'size'])
 
 class CartesianGrid2D(CellCollection):
     """
-    A 2D rectangular Cartesian grid spanning from point *p1* to *p2*. The grid
-    is divided into *nx* and *ny* cells in each direction.
+    A 2D rectangular Cartesian grid spanning a rectangular *box*. The grid
+    resolution is given as a 2-tuple of the coordinate resolutions in x and y
+    direction.
 
-    It uses the functions *frho*, *fvel* and *fu* to fix the hydrodynamic
-    quantities.
-
-    Example:
-
-    >>> grid = CartesianGrid2D((0.0, 0.0), (2.0, 3.0), 16, 24)
+    Hydrodynamic quantities are given as a function of the position vector.
 
     """
 
-    def __init__(self, box, nx, ny, fvel=None, frho=None, fu=None):
+    def __init__(self, box, resolution, velocity=None, density=None,
+                 internal_energy=None):
         self.box = box
-        self.__nx = nx
-        self.__ny = ny
-        self.__fvel = fvel
-        self.__frho = frho
-        self.__fu = fu
+        self.resolution = resolution
+        unity = lambda x: 1.0
+        zerovector = lambda x: Vector(0.0, 0.0, 0.0)
+        self.velocity = velocity or zerovector
+        self.density = density or unity
+        self.internal_energy = internal_energy or unity
 
     def __iter__(self):
-        """
-        Iterates over the cartesian grid.
-
-        >>> grid = CartesianGrid2D((0.0, 0.0), (1.0, 1.0), 2, 2)
-        >>> positions = map(lambda c: c.position, grid)
-        >>> assert (0.25, 0.75, 0.0) in positions
-        >>> assert (0.75, 0.75, 0.0) in positions
-
-        """
+        """Iterate over the cartesian grid"""
         # Unpack
         x1, y1 = self.box.position
         x2, y2 = self.box.position + self.box.size
@@ -57,19 +47,16 @@ class CartesianGrid2D(CellCollection):
         # Deltas
         dx = x2 - x1
         dy = y2 - y1
-        # Default functions
-        unity = lambda x: 1.0
-        zerovector = lambda x: Vector(0.0, 0.0, 0.0)
-        frho = self.__frho or unity
-        fvel = self.__fvel or zerovector
-        fu = self.__fu or unity
         # Yield cells
-        for kx, ky in product(range(self.__nx), range(self.__ny)):
-            pos = Vector((kx + 0.5) * dx / self.__nx, (ky + 0.5) * dy / self.__ny, 0.0)
-            vel = fvel(pos)
-            rho = frho(pos)
-            u = fu(pos)
-            yield Cell(pos, vel, rho, u)
+        nx, ny = self.resolution
+        for kx, ky in product(range(nx), range(ny)):
+            pos = Vector((kx + 0.5) * dx / nx, (ky + 0.5) * dy / ny, 0.0)
+            yield Cell(
+                pos,
+                self.velocity(pos),
+                self.density(pos),
+                self.internal_energy(pos)
+            )
 
     def check(self):
         """
