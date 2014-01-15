@@ -64,3 +64,9 @@ def test_unit():
 def test_dot():
     """Dot product of two vectors"""
     assert_equal(dot(Vector(3.0, 2.0), Vector(2.0, -1.0)), 4.0)
+
+
+def test_cross():
+    """Cross product of two vectors"""
+    assert_equal(cross(Vector(1, 0, 0), Vector(0, 1, 0)), Vector(0, 0, 1))
+    assert_equal(cross(Vector(1, 3, 2), Vector(-1, 1, 0)), Vector(-2, -2, 4))
