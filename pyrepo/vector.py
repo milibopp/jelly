@@ -33,3 +33,8 @@ class Vector(object):
 
     def __abs__(self):
         return sum(x ** 2 for x in self.values) ** 0.5
+
+
+def dot(v1, v2):
+    """Dot product of two vectors"""
+    return sum(a * b for a, b in zip(v1.values, v2.values))

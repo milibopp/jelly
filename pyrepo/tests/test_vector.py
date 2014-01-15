@@ -49,3 +49,8 @@ def test_div():
 def test_abs():
     """Absolute value of vector"""
     assert_equal(abs(Vector(3.0, 4.0)), 5.0)
+
+
+def test_dot():
+    """Dot product of two vectors"""
+    assert_equal(dot(Vector(3.0, 2.0), Vector(2.0, -1.0)), 4.0)
