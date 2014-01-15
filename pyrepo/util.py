@@ -9,7 +9,7 @@ from itertools import product
 from math import pi, sin, cos
 from collections import namedtuple
 
-from .model import CellCollection, Cell, Obstacle
+from .model import CellCollection, Cell, Obstacle, InconsistentGridError
 from .vector import Vector
 
 
@@ -63,12 +63,8 @@ class CartesianGrid2D(CellCollection):
         Do some self-consistency checks.
 
         """
-        assert self.__n1 > 0
-        assert self.__n2 > 0
-        assert len(self.__p1) == 2
-        assert len(self.__p2) == 2
-        for p1, p2 in zip(self.__p1, self.__p2):
-            assert p1 < p2
+        if not (self.resolution[0] > 0 and self.resolution[1] > 0):
+            raise InconsistentGridError('resolutions must be positive')
 
 
 class CircularObstacle(Obstacle):
