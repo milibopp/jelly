@@ -7,65 +7,56 @@ from __future__ import division
 
 from itertools import product
 from math import pi, sin, cos
+from collections import namedtuple
 
 from .model import CellCollection, Cell, Obstacle
+from .vector import Vector
+
+
+Rectangle = namedtuple('Rectangle', ['position', 'size'])
 
 
 class CartesianGrid2D(CellCollection):
     """
-    A 2D rectangular Cartesian grid spanning from point *p1* to *p2*. The grid
-    is divided into *nx* and *ny* cells in each direction.
+    A 2D rectangular Cartesian grid spanning a rectangular *box*. The grid
+    resolution is given as a 2-tuple of the coordinate resolutions in x and y
+    direction.
 
-    It uses the functions *frho*, *fvel* and *fu* to fix the hydrodynamic
-    quantities.
-
-    Example:
-
-    >>> grid = CartesianGrid2D((0.0, 0.0), (2.0, 3.0), 16, 24)
+    Hydrodynamic quantities are given as a function of the position vector.
 
     """
 
-    def __init__(self, p1, p2, nx, ny, fvel=None, frho=None, fu=None):
-        self.__p1 = p1
-        self.__p2 = p2
-        self.__nx = nx
-        self.__ny = ny
-        self.__fvel = fvel
-        self.__frho = frho
-        self.__fu = fu
+    def __init__(self, box, resolution, velocity=None, density=None,
+                 internal_energy=None):
+        self.box = box
+        self.resolution = resolution
+        unity = lambda x: 1.0
+        zerovector = lambda x: Vector(0.0, 0.0, 0.0)
+        self.velocity = velocity or zerovector
+        self.density = density or unity
+        self.internal_energy = internal_energy or unity
 
     def __iter__(self):
-        """
-        Iterates over the cartesian grid.
-
-        >>> grid = CartesianGrid2D((0.0, 0.0), (1.0, 1.0), 2, 2)
-        >>> positions = map(lambda c: c.position, grid)
-        >>> assert (0.25, 0.75, 0.0) in positions
-        >>> assert (0.75, 0.75, 0.0) in positions
-
-        """
+        """Iterate over the cartesian grid"""
         # Unpack
-        x1, y1 = self.__p1
-        x2, y2 = self.__p2
+        x1, y1 = self.box.position
+        x2, y2 = self.box.position + self.box.size
         # Order
         x1, x2 = min(x1, x2), max(x1, x2)
         y1, y2 = min(y1, y2), max(y1, y2)
         # Deltas
         dx = x2 - x1
         dy = y2 - y1
-        # Default functions
-        unity = lambda x, y, z: 1.0
-        zerovector = lambda x, y, z: (0.0, 0.0, 0.0)
-        frho = self.__frho or unity
-        fvel = self.__fvel or zerovector
-        fu = self.__fu or unity
         # Yield cells
-        for kx, ky in product(range(self.__nx), range(self.__ny)):
-            pos = (kx + 0.5) * dx / self.__nx, (ky + 0.5) * dy / self.__ny, 0.0
-            vel = fvel(*pos)
-            rho = frho(*pos)
-            u = fu(*pos)
-            yield Cell(pos, vel, rho, u)
+        nx, ny = self.resolution
+        for kx, ky in product(range(nx), range(ny)):
+            pos = Vector((kx + 0.5) * dx / nx, (ky + 0.5) * dy / ny, 0.0)
+            yield Cell(
+                pos,
+                self.velocity(pos),
+                self.density(pos),
+                self.internal_energy(pos)
+            )
 
     def check(self):
         """
@@ -96,9 +87,9 @@ class CircularObstacle(Obstacle):
                  n_phi=100):
         self.center = center
         self.radius = radius
-        self.density_function = density_function or (lambda x, y, z: 1.0)
-        self.internal_energy_function = internal_energy_function or (lambda x, y, z: 1.0)
-        self.velocity_function = velocity_function or (lambda x, y, z: (0.0, 0.0, 0.0))
+        self.density_function = density_function or (lambda x: 1.0)
+        self.internal_energy_function = internal_energy_function or (lambda x: 1.0)
+        self.velocity_function = velocity_function or (lambda x: (0.0, 0.0, 0.0))
         self.n_phi = n_phi
 
     @property
@@ -124,9 +115,9 @@ class CircularObstacle(Obstacle):
         # TODO: test this properly
         for k in range(self.n_phi):
             x = self.__circle_position(k, False)
-            v = self.velocity_function(*x)
-            rho = self.density_function(*x)
-            u = self.internal_energy_function(*x)
+            v = self.velocity_function(x)
+            rho = self.density_function(x)
+            u = self.internal_energy_function(x)
             yield Cell(x, v, rho, u, category='solid_adjacent')
             yield Cell(self.__circle_position(k, True), (0.0, 0.0, 0.0), 1.0,
                        1.0, category='solid')

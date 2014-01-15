@@ -10,7 +10,8 @@ from hashlib import md5
 
 from pyrepo.ics import *
 from pyrepo.model import Cell, Mesh
-from pyrepo.util import CartesianGrid2D, CircularObstacle
+from pyrepo.util import CartesianGrid2D, CircularObstacle, Rectangle
+from pyrepo.vector import Vector
 from .test_model import _random_mesh, make_mesh_with_nbody_cell
 
 
@@ -71,7 +72,7 @@ def test_make_default_header():
 
 def test_body_block_vector():
     """Vectorial body block"""
-    data = [(0, 0, 0), (1, 0, 0), (2, -1, 0)]
+    data = [Vector(0, 0, 0), Vector(1, 0, 0), Vector(2, -1, 0)]
     fmt = 'ddd'
     body = make_body(fmt, data)
     assert_equal(body[:4], struct.pack('i', 72))
@@ -96,7 +97,7 @@ def test_iterate_ids_simple():
 
 def _mesh_with_obstacle():
     """Generate a mesh with obstacles for testing"""
-    grid = CartesianGrid2D((0, 0), (2, 2), 10, 10)
+    grid = CartesianGrid2D(Rectangle(Vector(0, 0), Vector(2, 2)), (10, 10))
     circle = CircularObstacle((1, 1), 0.2, n_phi=12)
     return Mesh(grid, [circle])
 

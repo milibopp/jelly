@@ -3,7 +3,8 @@
 from nose.tools import assert_equal, raises
 import random
 
-from pyrepo.util import CartesianGrid2D
+from pyrepo.util import CartesianGrid2D, Rectangle
+from pyrepo.vector import Vector
 from pyrepo.model import *
 
 
@@ -34,7 +35,10 @@ def make_mesh_with_nbody_cell(gridres=32):
 
     """
     nbody_cell = Cell((0, 0, 0), (0, 0, 0), 2.0, 2.0, 'nbody')
-    return Mesh(CartesianGrid2D((-2.0, -2.0), (2.0, 2.0), gridres, gridres),
+    return Mesh(
+        CartesianGrid2D(
+            Rectangle(Vector(-2.0, -2.0), Vector(4.0, 4.0)),
+            (gridres, gridres)),
         extras=[ListCellCollection([nbody_cell])])
 
 
