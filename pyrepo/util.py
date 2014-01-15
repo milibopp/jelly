@@ -7,8 +7,13 @@ from __future__ import division
 
 from itertools import product
 from math import pi, sin, cos
+from collections import namedtuple
 
 from .model import CellCollection, Cell, Obstacle
+from .vector import Vector
+
+
+Rectangle = namedtuple('Rectangle', ['position', 'size'])
 
 
 class CartesianGrid2D(CellCollection):
@@ -25,9 +30,8 @@ class CartesianGrid2D(CellCollection):
 
     """
 
-    def __init__(self, p1, p2, nx, ny, fvel=None, frho=None, fu=None):
-        self.__p1 = p1
-        self.__p2 = p2
+    def __init__(self, box, nx, ny, fvel=None, frho=None, fu=None):
+        self.box = box
         self.__nx = nx
         self.__ny = ny
         self.__fvel = fvel
@@ -45,8 +49,8 @@ class CartesianGrid2D(CellCollection):
 
         """
         # Unpack
-        x1, y1 = self.__p1
-        x2, y2 = self.__p2
+        x1, y1 = self.box.position
+        x2, y2 = self.box.position + self.box.size
         # Order
         x1, x2 = min(x1, x2), max(x1, x2)
         y1, y2 = min(y1, y2), max(y1, y2)
@@ -55,13 +59,13 @@ class CartesianGrid2D(CellCollection):
         dy = y2 - y1
         # Default functions
         unity = lambda x: 1.0
-        zerovector = lambda x: (0.0, 0.0, 0.0)
+        zerovector = lambda x: Vector(0.0, 0.0, 0.0)
         frho = self.__frho or unity
         fvel = self.__fvel or zerovector
         fu = self.__fu or unity
         # Yield cells
         for kx, ky in product(range(self.__nx), range(self.__ny)):
-            pos = (kx + 0.5) * dx / self.__nx, (ky + 0.5) * dy / self.__ny, 0.0
+            pos = Vector((kx + 0.5) * dx / self.__nx, (ky + 0.5) * dy / self.__ny, 0.0)
             vel = fvel(pos)
             rho = frho(pos)
             u = fu(pos)
