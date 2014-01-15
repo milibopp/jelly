@@ -104,7 +104,10 @@ class CircularObstacle(Obstacle):
         """
         r = self.radius * (1 + 0.5 * self.__angle_segment * (-1 if inner else 1))
         phi = (k + 0.5) * self.__angle_segment
-        return r * sin(phi) + self.center[0], r * cos(phi) + self.center[1], 0.0
+        return Vector(
+            r * sin(phi) + self.center[0],
+            r * cos(phi) + self.center[1],
+            0.0)
 
     def __iter__(self):
         """Iterates over all cells making up the obstacle."""
