@@ -2,7 +2,6 @@
 
 from nose.tools import assert_equal, raises
 import random
-from collections import namedtuple
 
 from pyrepo.util import CartesianGrid2D
 from pyrepo.model import *
