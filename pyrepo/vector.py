@@ -13,6 +13,9 @@ class Vector(object):
     def __repr__(self):
         return 'Vector{}'.format(self.__values)
 
+    def __getitem__(self, key):
+        return self.__values[key]
+
     def __len__(self):
         return len(self.__values)
 

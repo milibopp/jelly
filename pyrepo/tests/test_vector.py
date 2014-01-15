@@ -21,6 +21,11 @@ def test_len():
     assert_equal(len(Vector(2, 5, 6)), 3)
 
 
+def test_getitem():
+    """Index access"""
+    assert_equal(Vector(2, 1)[1], 1)
+
+
 def test_equality():
     """Equality of vectors"""
     assert_equal(Vector(2, 1), Vector(2, 1))
