@@ -44,3 +44,12 @@ class Vector(object):
 def dot(v1, v2):
     """Dot product of two vectors"""
     return sum(a * b for a, b in zip(v1.values, v2.values))
+
+
+def cross(a, b):
+    """Cross product of two 3-vectors"""
+    assert len(a) == len(b) == 3
+    return Vector(
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0])
