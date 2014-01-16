@@ -125,7 +125,7 @@ def make_body(fmt, data):
 def iterate_ids(cells):
     """Iterates over the computed IDs of a given mesh"""
     counter = {
-        'normal': 0,
+        'normal': 1,
         'solid': 30000000,
         'solid_adjacent': 40000000}
     for category in map_quantity(cells, 'category'):
