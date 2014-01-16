@@ -76,17 +76,22 @@ class CircularObstacle(Obstacle):
     quantities in the surrounding fluid. The resolution of the circle is
     controlled via the parameter `n_phi`.
 
+    The `inverted` flag controls whether the circle is to be constructed
+    inside-out, i.e. the solid cells are outside, the fluid cells inside. It
+    defaults to False.
+
     """
 
     def __init__(self, center, radius, velocity_function=None,
                  density_function=None, internal_energy_function=None,
-                 n_phi=100):
+                 n_phi=100, inverted=False):
         self.center = center
         self.radius = radius
         self.density_function = density_function or (lambda x: 1.0)
         self.internal_energy_function = internal_energy_function or (lambda x: 1.0)
         self.velocity_function = velocity_function or (lambda x: (0.0, 0.0, 0.0))
         self.n_phi = n_phi
+        self.inverted = inverted
 
     @property
     def __angle_segment(self):
@@ -113,12 +118,12 @@ class CircularObstacle(Obstacle):
         """Iterates over all cells making up the obstacle."""
         # TODO: test this properly
         for k in range(self.n_phi):
-            x = self.__circle_position(k, False)
+            x = self.__circle_position(k, self.inverted)
             v = self.velocity_function(x)
             rho = self.density_function(x)
             u = self.internal_energy_function(x)
             yield Cell(x, v, rho, u, category='solid_adjacent')
-            yield Cell(self.__circle_position(k, True), (0.0, 0.0, 0.0), 1.0,
+            yield Cell(self.__circle_position(k, not self.inverted), (0.0, 0.0, 0.0), 1.0,
                        1.0, category='solid')
 
     def inside(self, position):
@@ -133,8 +138,9 @@ class CircularObstacle(Obstacle):
 
         """
         dist = sum((self.center[i] - position[i]) ** 2.0 for i in [0, 1]) ** 0.5
-        r_max = self.radius * (1 + 1.5 * self.__angle_segment)
-        return dist < r_max
+        extra_space = 1.5 * self.__angle_segment
+        r_max = self.radius * (1 + extra_space * (-1 if self.inverted else 1))
+        return (dist > r_max) if self.inverted else (dist < r_max)
 
     def check(self):
         """Some sanity checks."""
