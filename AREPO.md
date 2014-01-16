@@ -7,6 +7,11 @@ Config.sh in the Arepo directory needs to be changed and Arepo recompiled in cer
 - Change of any compiler flags, obviously
 - Change of domain box size
 
+## Initial conditions
+
+- Never use zero as a cell ID, it causes the derefinement subroutines to crash,
+  since they internally set the ID of removed cells to zero
+
 
 # Open questions
 
