@@ -9,10 +9,10 @@ from tempfile import NamedTemporaryFile
 from hashlib import md5
 
 from pyrepo.ics import *
-from pyrepo.model import Cell, Mesh
+from pyrepo.model import Cell, Mesh, UniformGas
 from pyrepo.util import CartesianGrid2D, CircularObstacle, Rectangle
 from pyrepo.vector import Vector
-from .test_model import _random_mesh, make_mesh_with_nbody_cell
+from .test_model import make_random_mesh, make_mesh_with_nbody_cell
 
 
 def test_make_f77_block():
@@ -91,7 +91,7 @@ def test_body_block_scalar():
 
 def test_iterate_ids_simple():
     """Generate IDs for plain mesh"""
-    id_iter = iterate_ids(_random_mesh().cells)
+    id_iter = iterate_ids(make_random_mesh().cells)
     assert_equal(list(id_iter), range(1, 11))
 
 
@@ -99,7 +99,7 @@ def _mesh_with_obstacle():
     """Generate a mesh with obstacles for testing"""
     grid = CartesianGrid2D(Rectangle(Vector(0, 0), Vector(2, 2)), (10, 10))
     circle = CircularObstacle((1, 1), 0.2, n_phi=12)
-    return Mesh(grid, [circle])
+    return Mesh(UniformGas(), grid, [circle])
 
 
 def test_iterate_ids_obstacle():

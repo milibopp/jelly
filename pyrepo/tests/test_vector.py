@@ -46,6 +46,11 @@ def test_mul():
     assert_equal(Vector(3, 1) * 2, Vector(6, 2))
 
 
+def test_mul():
+    """Multiply vector by scalar"""
+    assert_equal(2 * Vector(3, 1), Vector(6, 2))
+
+
 def test_div():
     """Divide vector by scalar"""
     assert_equal(Vector(4.0, 1.0) / 2.0, Vector(2.0, 0.5))

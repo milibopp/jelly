@@ -11,6 +11,8 @@ cell's coordinates, solid objects used for special boundaries etc.
 from __future__ import division
 from abc import ABCMeta, abstractproperty, abstractmethod
 
+from .vector import Vector
+
 
 class Cell(object):
     """
@@ -45,6 +47,102 @@ class Cell(object):
         self.density = density
         self.internal_energy = internal_energy
         self.category = category
+
+
+class Gas(object):
+    """
+    Description of a background gas in terms of several functions
+
+    """
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def velocity(self, position):
+        """Velocity of the gas"""
+        pass
+
+    @abstractmethod
+    def density(self, position):
+        """Density of the gas"""
+        pass
+
+    @abstractmethod
+    def internal_energy(self, position):
+        """Internal energy of the gas"""
+        pass
+
+    def create_cell(self, position, category='normal'):
+        """Create a gas cell at a given position"""
+        return Cell(
+            position,
+            self.velocity(position),
+            self.density(position),
+            self.internal_energy(position),
+            category)
+
+
+class UniformGas(Gas):
+    """
+    A uniform background gas
+
+    This gas has zero velocity and a constant density and internal energy of
+    one.
+
+    """
+
+    def __init__(self,
+            velocity=Vector(0.0, 0.0, 0.0),
+            density=1.0,
+            internal_energy=1.0
+            ):
+        self.__velocity = velocity
+        self.__density = density
+        self.__internal_energy = internal_energy
+
+    def velocity(self, position):
+        return self.__velocity
+
+    def density(self, position):
+        return self.__density
+
+    def internal_energy(self, position):
+        return self.__internal_energy
+
+
+class FunctionalGas(Gas):
+    """
+    A background gas described by functions
+
+    It requires the velocity as a vector field and two scalar fields, the
+    density and internal energy
+
+    """
+
+    def __init__(self, velocity, density, internal_energy):
+        self.__velocity = velocity
+        self.__density = density
+        self.__internal_energy = internal_energy
+
+    def velocity(self, position):
+        return self.__velocity(position)
+
+    def density(self, position):
+        return self.__density(position)
+
+    def internal_energy(self, position):
+        return self.__internal_energy(position)
+
+
+def approximate_gas(gas, grid, obstacles=None):
+    """Approximate a continuous gas using a discrete grid"""
+    for grid_point in grid:
+        valid = True
+        if obstacles:
+            valid = not any(obstacle.inside(grid_point)
+                for obstacle in obstacles)
+        if valid:
+            yield gas.create_cell(grid_point)
 
 
 class InconsistentGridError(Exception):
@@ -101,7 +199,7 @@ class ListCellCollection(list, CellCollection):
             positions.add(pos)
 
 
-class Obstacle(CellCollection):
+class Obstacle(object):
     """
     This represents a solid obstacle within the simulation domain acting as an
     arbitrarily shaped reflective boundary condition.
@@ -128,21 +226,12 @@ class Mesh(object):
 
     """
 
-    def __init__(self, gas, obstacles=None, extras=None, boxsize=1.0):
+    def __init__(self, gas, grid, obstacles=None, extras=None, boxsize=1.0):
         self.gas = gas
+        self.grid = grid
         self.obstacles = obstacles or list()
         self.extras = extras or list()
         self.boxsize = boxsize
-
-    def __outside_obstacles(self, cell):
-        """
-        Tests, whether a given cell does intersect with any obstacle.
-
-        """
-        for obstacle in self.obstacles:
-            if obstacle.inside(cell.position):
-                return False
-        return True
 
     @property
     def cells(self):
@@ -152,11 +241,12 @@ class Mesh(object):
         obstacles.
 
         """
-        for cell in self.gas:
-            if self.__outside_obstacles(cell):
-                yield cell
+        for cell in approximate_gas(self.gas, self.grid, self.obstacles):
+            yield cell
         for obstacle in self.obstacles:
-            for cell in obstacle:
+            for cell in obstacle.gas_cells(self.gas):
+                yield cell
+            for cell in obstacle.solid_cells():
                 yield cell
         for extra in self.extras:
             for cell in extra:
