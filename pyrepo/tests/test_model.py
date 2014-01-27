@@ -58,6 +58,18 @@ def test_uniform_gas():
     assert_equal(gas.internal_energy(x), 1.0)
 
 
+def test_functional_gas():
+    """Functional gas"""
+    gas = FunctionalGas(
+        lambda x: 2*x,
+        lambda x: abs(x),
+        lambda x: abs(x) * 0.5)
+    cell = gas.create_cell(Vector(4.0, -3.0, 0.0))
+    assert_equal(cell.velocity, Vector(8.0, -6.0, 0.0))
+    assert_equal(cell.density, 5.0)
+    assert_equal(cell.internal_energy, 2.5)
+
+
 def test_make_gas_cell_uniform():
     gas = UniformGas(Vector(-1.0, 2.0, 3.0), 2.5, 1.3)
     cell = gas.create_cell(Vector(1.0, 2.0, 3.0))

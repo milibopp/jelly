@@ -110,6 +110,30 @@ class UniformGas(Gas):
         return self.__internal_energy
 
 
+class FunctionalGas(Gas):
+    """
+    A background gas described by functions
+
+    It requires the velocity as a vector field and two scalar fields, the
+    density and internal energy
+
+    """
+
+    def __init__(self, velocity, density, internal_energy):
+        self.__velocity = velocity
+        self.__density = density
+        self.__internal_energy = internal_energy
+
+    def velocity(self, position):
+        return self.__velocity(position)
+
+    def density(self, position):
+        return self.__density(position)
+
+    def internal_energy(self, position):
+        return self.__internal_energy(position)
+
+
 class InconsistentGridError(Exception):
     """Raised when a grid is found to be inconsistent."""
     pass
