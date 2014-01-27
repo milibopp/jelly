@@ -260,8 +260,11 @@ class ArepoRun(object):
         with open(self.arepo.systype, 'w') as msystype:
             msystype.write('SYSTYPE="{}"'.format(self.systype))
         # Compile
-        subprocess.call(['make', '-j{:d}'.format(self.proc_count)],
-                        cwd=self.arepo.directory)
+        retcode = subprocess.call(['make', '-j{:d}'.format(self.proc_count)],
+                                  cwd=self.arepo.directory)
+        if retcode != 0:
+            raise RuntimeError(
+                'Arepo compilation failed (exit code: {})'.format(retcode))
 
     def run(self, parameters, initial_conditions):
         """
