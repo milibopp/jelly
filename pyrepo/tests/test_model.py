@@ -77,3 +77,9 @@ def test_make_gas_cell_uniform():
     assert_equal(cell.velocity, Vector(-1.0, 2.0, 3.0))
     assert_equal(cell.density, 2.5)
     assert_equal(cell.internal_energy, 1.3)
+
+
+def test_create_gas_category():
+    gas = UniformGas()
+    cell = gas.create_cell(Vector(1.0, 2.0, 3.0), 'test_category')
+    assert_equal(cell.category, 'test_category')

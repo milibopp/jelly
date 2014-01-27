@@ -72,14 +72,14 @@ class Gas(object):
         """Internal energy of the gas"""
         pass
 
-    def create_cell(self, position):
+    def create_cell(self, position, category='normal'):
         """Create a gas cell at a given position"""
         return Cell(
             position,
             self.velocity(position),
             self.density(position),
             self.internal_energy(position),
-            'normal')
+            category)
 
 
 class UniformGas(Gas):
