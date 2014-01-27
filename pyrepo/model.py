@@ -134,6 +134,17 @@ class FunctionalGas(Gas):
         return self.__internal_energy(position)
 
 
+def approximate_gas(gas, grid, obstacles=None):
+    """Approximate a continuous gas using a discrete grid"""
+    for grid_point in grid:
+        valid = True
+        if obstacles:
+            valid = not any(obstacle.inside(grid_point)
+                for obstacle in obstacles)
+        if valid:
+            yield gas.create_cell(grid_point)
+
+
 class InconsistentGridError(Exception):
     """Raised when a grid is found to be inconsistent."""
     pass
@@ -188,7 +199,7 @@ class ListCellCollection(list, CellCollection):
             positions.add(pos)
 
 
-class Obstacle(CellCollection):
+class Obstacle(object):
     """
     This represents a solid obstacle within the simulation domain acting as an
     arbitrarily shaped reflective boundary condition.
@@ -215,21 +226,12 @@ class Mesh(object):
 
     """
 
-    def __init__(self, gas, obstacles=None, extras=None, boxsize=1.0):
+    def __init__(self, gas, grid, obstacles=None, extras=None, boxsize=1.0):
         self.gas = gas
+        self.grid = grid
         self.obstacles = obstacles or list()
         self.extras = extras or list()
         self.boxsize = boxsize
-
-    def __outside_obstacles(self, cell):
-        """
-        Tests, whether a given cell does intersect with any obstacle.
-
-        """
-        for obstacle in self.obstacles:
-            if obstacle.inside(cell.position):
-                return False
-        return True
 
     @property
     def cells(self):
@@ -239,11 +241,12 @@ class Mesh(object):
         obstacles.
 
         """
-        for cell in self.gas:
-            if self.__outside_obstacles(cell):
-                yield cell
+        for cell in approximate_gas(self.gas, self.grid, self.obstacles):
+            yield cell
         for obstacle in self.obstacles:
-            for cell in obstacle:
+            for cell in obstacle.gas_cells(self.gas):
+                yield cell
+            for cell in obstacle.solid_cells():
                 yield cell
         for extra in self.extras:
             for cell in extra:

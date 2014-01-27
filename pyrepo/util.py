@@ -8,15 +8,36 @@ from __future__ import division
 from itertools import product
 from math import pi, sin, cos
 from collections import namedtuple
+from random import uniform
 
-from .model import CellCollection, Cell, Obstacle, InconsistentGridError
+from .model import CellCollection, Cell, Obstacle, InconsistentGridError, UniformGas
 from .vector import Vector
 
 
 Rectangle = namedtuple('Rectangle', ['position', 'size'])
 
 
-class CartesianGrid2D(CellCollection):
+class MonteCarloGrid2D(object):
+    """
+    A completely random grid
+
+    Its grid points are sampled uniformly within a box. The number of grid
+    points can be specified.
+
+    """
+
+    def __init__(self, box, number):
+        self.box = box
+        self.number = number
+
+    def __iter__(self):
+        for _ in range(self.number):
+            x, y = (uniform(x, dx)
+                for x, dx in zip(self.box.position, self.box.size))
+            yield Vector(x, y, 0.0)
+
+
+class CartesianGrid2D(object):
     """
     A 2D rectangular Cartesian grid spanning a rectangular *box*. The grid
     resolution is given as a 2-tuple of the coordinate resolutions in x and y
@@ -26,45 +47,16 @@ class CartesianGrid2D(CellCollection):
 
     """
 
-    def __init__(self, box, resolution, velocity=None, density=None,
-                 internal_energy=None):
+    def __init__(self, box, resolution):
         self.box = box
         self.resolution = resolution
-        unity = lambda x: 1.0
-        zerovector = lambda x: Vector(0.0, 0.0, 0.0)
-        self.velocity = velocity or zerovector
-        self.density = density or unity
-        self.internal_energy = internal_energy or unity
 
     def __iter__(self):
         """Iterate over the cartesian grid"""
-        # Unpack
-        x1, y1 = self.box.position
-        x2, y2 = self.box.position + self.box.size
-        # Order
-        x1, x2 = min(x1, x2), max(x1, x2)
-        y1, y2 = min(y1, y2), max(y1, y2)
-        # Deltas
-        dx = x2 - x1
-        dy = y2 - y1
-        # Yield cells
         nx, ny = self.resolution
+        dx, dy = self.box.size
         for kx, ky in product(range(nx), range(ny)):
-            pos = Vector((kx + 0.5) * dx / nx, (ky + 0.5) * dy / ny, 0.0)
-            yield Cell(
-                pos,
-                self.velocity(pos),
-                self.density(pos),
-                self.internal_energy(pos)
-            )
-
-    def check(self):
-        """
-        Do some self-consistency checks.
-
-        """
-        if not (self.resolution[0] > 0 and self.resolution[1] > 0):
-            raise InconsistentGridError('resolutions must be positive')
+            yield Vector((kx + 0.5) * dx / nx, (ky + 0.5) * dy / ny, 0.0)
 
 
 class CircularObstacle(Obstacle):
@@ -82,14 +74,9 @@ class CircularObstacle(Obstacle):
 
     """
 
-    def __init__(self, center, radius, velocity_function=None,
-                 density_function=None, internal_energy_function=None,
-                 n_phi=100, inverted=False):
+    def __init__(self, center, radius, n_phi=100, inverted=False):
         self.center = center
         self.radius = radius
-        self.density_function = density_function or (lambda x: 1.0)
-        self.internal_energy_function = internal_energy_function or (lambda x: 1.0)
-        self.velocity_function = velocity_function or (lambda x: (0.0, 0.0, 0.0))
         self.n_phi = n_phi
         self.inverted = inverted
 
@@ -114,17 +101,19 @@ class CircularObstacle(Obstacle):
             r * cos(phi) + self.center[1],
             0.0)
 
-    def __iter__(self):
-        """Iterates over all cells making up the obstacle."""
-        # TODO: test this properly
+    def gas_cells(self, gas):
+        """Generator of gas cells surrounding obstacle"""
         for k in range(self.n_phi):
             x = self.__circle_position(k, self.inverted)
-            v = self.velocity_function(x)
-            rho = self.density_function(x)
-            u = self.internal_energy_function(x)
-            yield Cell(x, v, rho, u, category='solid_adjacent')
-            yield Cell(self.__circle_position(k, not self.inverted), (0.0, 0.0, 0.0), 1.0,
-                       1.0, category='solid')
+            yield gas.create_cell(x, 'solid_adjacent')
+
+    def solid_cells(self):
+        """Generator of solid obstacle cells"""
+        nongas = UniformGas()
+        for k in range(self.n_phi):
+            yield nongas.create_cell(
+                self.__circle_position(k, not self.inverted),
+                category='solid')
 
     def inside(self, position):
         """
@@ -141,9 +130,3 @@ class CircularObstacle(Obstacle):
         extra_space = 1.5 * self.__angle_segment
         r_max = self.radius * (1 + extra_space * (-1 if self.inverted else 1))
         return (dist > r_max) if self.inverted else (dist < r_max)
-
-    def check(self):
-        """Some sanity checks."""
-        assert self.radius > 0
-        assert type(n_phi) is int
-        assert n_phi > 0
