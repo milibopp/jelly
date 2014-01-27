@@ -11,6 +11,8 @@ cell's coordinates, solid objects used for special boundaries etc.
 from __future__ import division
 from abc import ABCMeta, abstractproperty, abstractmethod
 
+from .vector import Vector
+
 
 class Cell(object):
     """
@@ -45,6 +47,72 @@ class Cell(object):
         self.density = density
         self.internal_energy = internal_energy
         self.category = category
+
+
+class Gas(object):
+    """
+    Description of a background gas in terms of several functions
+
+    """
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def velocity(self, position):
+        """Velocity of the gas"""
+        pass
+
+    @abstractmethod
+    def density(self, position):
+        """Density of the gas"""
+        pass
+
+    @abstractmethod
+    def internal_energy(self, position):
+        """Internal energy of the gas"""
+        pass
+
+
+class UniformGas(Gas):
+    """
+    A uniform background gas
+
+    This gas has zero velocity and a constant density and internal energy of
+    one.
+
+    """
+
+    def __init__(self,
+            velocity=Vector(0.0, 0.0, 0.0),
+            density=1.0,
+            internal_energy=1.0
+            ):
+        self.__velocity = velocity
+        self.__density = density
+        self.__internal_energy = internal_energy
+
+    def velocity(self, position):
+        return self.__velocity
+
+    def density(self, position):
+        return self.__density
+
+    def internal_energy(self, position):
+        return self.__internal_energy
+
+
+def make_gas_cell(position, gas):
+    """
+    Make a gas cell given a position and a description of the gas
+
+    """
+    return Cell(
+        position,
+        gas.velocity(position),
+        gas.density(position),
+        gas.internal_energy(position),
+        'normal',
+    )
 
 
 class InconsistentGridError(Exception):

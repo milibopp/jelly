@@ -47,3 +47,22 @@ def test_extra_objects():
     mesh = make_mesh_with_nbody_cell()
     cells = list(mesh.cells)
     assert_equal(sum(1 for cell in cells if cell.category == 'nbody'), 1)
+
+
+def test_uniform_gas():
+    """Uniform gas"""
+    gas = UniformGas()
+    x = Vector(1.0, 2.0, 3.0)
+    assert_equal(gas.velocity(x), Vector(0.0, 0.0, 0.0))
+    assert_equal(gas.density(x), 1.0)
+    assert_equal(gas.internal_energy(x), 1.0)
+
+
+def test_make_gas_cell_uniform():
+    gas = UniformGas(Vector(-1.0, 2.0, 3.0), 2.5, 1.3)
+    x = Vector(1.0, 2.0, 3.0)
+    cell = make_gas_cell(x, gas)
+    assert_equal(cell.position, x)
+    assert_equal(cell.velocity, Vector(-1.0, 2.0, 3.0))
+    assert_equal(cell.density, 2.5)
+    assert_equal(cell.internal_energy, 1.3)
