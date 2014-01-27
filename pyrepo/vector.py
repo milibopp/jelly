@@ -31,6 +31,9 @@ class Vector(object):
     def __mul__(self, scalar):
         return Vector(*(x * scalar for x in self.values))
 
+    def __rmul__(self, scalar):
+        return Vector(*(x * scalar for x in self.values))
+
     def __div__(self, scalar):
         return Vector(*(x / scalar for x in self.values))
 
