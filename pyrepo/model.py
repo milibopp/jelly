@@ -72,6 +72,15 @@ class Gas(object):
         """Internal energy of the gas"""
         pass
 
+    def create_cell(self, position):
+        """Create a gas cell at a given position"""
+        return Cell(
+            position,
+            self.velocity(position),
+            self.density(position),
+            self.internal_energy(position),
+            'normal')
+
 
 class UniformGas(Gas):
     """
@@ -99,20 +108,6 @@ class UniformGas(Gas):
 
     def internal_energy(self, position):
         return self.__internal_energy
-
-
-def make_gas_cell(position, gas):
-    """
-    Make a gas cell given a position and a description of the gas
-
-    """
-    return Cell(
-        position,
-        gas.velocity(position),
-        gas.density(position),
-        gas.internal_energy(position),
-        'normal',
-    )
 
 
 class InconsistentGridError(Exception):

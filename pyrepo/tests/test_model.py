@@ -60,9 +60,8 @@ def test_uniform_gas():
 
 def test_make_gas_cell_uniform():
     gas = UniformGas(Vector(-1.0, 2.0, 3.0), 2.5, 1.3)
-    x = Vector(1.0, 2.0, 3.0)
-    cell = make_gas_cell(x, gas)
-    assert_equal(cell.position, x)
+    cell = gas.create_cell(Vector(1.0, 2.0, 3.0))
+    assert_equal(cell.position, Vector(1.0, 2.0, 3.0))
     assert_equal(cell.velocity, Vector(-1.0, 2.0, 3.0))
     assert_equal(cell.density, 2.5)
     assert_equal(cell.internal_energy, 1.3)
