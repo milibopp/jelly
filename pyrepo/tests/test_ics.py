@@ -92,7 +92,7 @@ def test_body_block_scalar():
 def test_iterate_ids_simple():
     """Generate IDs for plain mesh"""
     id_iter = iterate_ids(_random_mesh().cells)
-    assert_equal(list(id_iter), range(10))
+    assert_equal(list(id_iter), range(1, 11))
 
 
 def _mesh_with_obstacle():
@@ -153,7 +153,7 @@ def test_write_ics_md5():
     """Write initial conditions"""
     mesh = _mesh_with_obstacle()
     output_hash = _hash_write(mesh)
-    assert_equal(output_hash, '8e48389d423399613169580528502d7a')
+    assert_equal(output_hash, '9c509254bdd66a68a0d5b1568bceb16d')
 
 
 def test_iterate_ids_with_nbody():
@@ -161,11 +161,11 @@ def test_iterate_ids_with_nbody():
     mesh = make_mesh_with_nbody_cell(10)
     ids = list(iterate_ids(mesh.cells))
     assert_equal(len(ids), 101)
-    assert_equal(ids, range(101))
+    assert_equal(ids, range(1, 102))
 
 
 def test_write_ics_with_nbody_md5():
     """Write initial conditions with N-body particle"""
     mesh = make_mesh_with_nbody_cell(10)
     output_hash = _hash_write(mesh)
-    assert_equal(output_hash, 'ec079813bbe690cf64f0c03fc55cfaac')
+    assert_equal(output_hash, 'a96c0d16ef7aa91a48b4811f36dba2d7')
