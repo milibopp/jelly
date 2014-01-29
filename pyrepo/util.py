@@ -9,6 +9,7 @@ from itertools import product
 from math import pi, sin, cos
 from collections import namedtuple
 from random import uniform
+import numpy as np
 
 from .model import CellCollection, Cell, Obstacle, InconsistentGridError, UniformGas
 from .vector import Vector
@@ -57,6 +58,20 @@ class CartesianGrid2D(object):
         dx, dy = self.box.size
         for kx, ky in product(range(nx), range(ny)):
             yield Vector((kx + 0.5) * dx / nx, (ky + 0.5) * dy / ny, 0.0)
+
+
+class PolarGrid2D(object):
+
+    def __init__(self, center, boundaries, resolution):
+        self.center = center
+        self.boundaries = boundaries
+        self.resolution = resolution
+
+    def __iter__(self):
+        a, b = self.boundaries
+        for r in np.arange(a, b, self.resolution):
+            for phi in np.linspace(0.0, 2*pi, (2*pi*r/self.resolution), endpoint=False):
+                yield self.center + Vector(r*cos(phi), r*sin(phi), 0.0)
 
 
 class CircularObstacle(Obstacle):
