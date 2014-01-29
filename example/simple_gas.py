@@ -22,12 +22,12 @@ gas = UniformGas(
 
 # Setup a grid to approximate the continuous gas
 grid = CartesianGrid2D(
-        Rectangle(Vector(0.0, 0.0), Vector(2.0, 2.0)),
-        (16, 16))
+        Rectangle(Vector(0.0, 0.0), Vector(1.0, 1.0)),
+        (32, 32))
 
 # Combine everything into a mesh
-mesh = Mesh(gas, grid, boxsize=2.0)
+mesh = Mesh(gas, grid)
 
 # Write the mesh to a file
-with open('simple_mesh.dat', 'wb') as icfile:
+with open('simple_gas.dat', 'wb') as icfile:
     write_icfile(icfile, mesh)

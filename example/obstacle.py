@@ -20,12 +20,12 @@ grid = CartesianGrid2D(
 
 # Setup a circular obstacle
 circle = CircularObstacle(
-        center=Vector(1.0, 1.0),
+        center=Vector(0.5, 0.5),
         radius=0.1,
         n_phi=100)
 
 # Combine everything into a mesh
-mesh = Mesh(gas, grid, [circle], boxsize=2.0)
+mesh = Mesh(gas, grid, [circle])
 
 # Write the mesh to a file
 with open('obstacle.dat', 'wb') as icfile:
