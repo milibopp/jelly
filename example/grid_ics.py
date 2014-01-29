@@ -1,10 +1,10 @@
-'''Small script to generate a rectangular grid with pyrepo.'''
+'''Small script to generate a rectangular grid with jelly.'''
 
 import sys
 
-from pyrepo.ics import write_icfile
-from pyrepo.model import Mesh
-from pyrepo.util import CartesianGrid2D
+from jelly.ics import write_icfile
+from jelly.model import Mesh
+from jelly.util import CartesianGrid2D
 
 
 def main():
