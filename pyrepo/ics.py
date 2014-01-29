@@ -123,7 +123,16 @@ def make_body(fmt, data):
 
 
 def iterate_ids(cells):
-    """Iterates over the computed IDs of a given mesh"""
+    """
+    Iterates over the computed IDs of a given mesh
+
+    Normal gas cells start at 1, solid cells at 30000000, gas cells comoving
+    with solids at 40000000.
+
+    NOTE: never use zero as a cell ID, it causes the derefinement subroutines
+    to crash, since they internally set the ID of removed cells to zero
+
+    """
     counter = {
         'normal': 1,
         'solid': 30000000,
