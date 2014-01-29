@@ -4,9 +4,9 @@ center and exports this as initial conditions.
 
 """
 
-from pyrepo.ics import write_icfile
-from pyrepo.model import Mesh
-from pyrepo.util import CartesianGrid2D, CircularObstacle
+from jelly.ics import write_icfile
+from jelly.model import Mesh
+from jelly.util import CartesianGrid2D, CircularObstacle
 
 
 if __name__ == '__main__':

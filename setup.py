@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 """Setup script for pyrepo."""
 
-from distutils.core import setup
+from setuptools import setup
 
 
 if __name__ == '__main__':
     setup(
-        name='pyrepo',
-        version='0.0',
-        description='Convenient Python wrapper for the hydrodynamics software Arepo',
+        name='jelly',
+        version='0.1.0',
+        description='Abstraction layer for running numerical hydrodynamics software',
         author='Eduard Bopp',
         author_email='eduard.bopp@aepsil0n.de',
-        packages=['pyrepo'],
+        packages=['jelly'],
     )
