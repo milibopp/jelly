@@ -275,7 +275,7 @@ class ArepoRun(object):
 
         """
         # Write parameter file
-        pfile = 'pyrepo-params.txt'
+        pfile = 'jelly-params.txt'
         parameters.write(pfile)
         # Write initial conditions binary
         with open(parameters['InitCondFile'], 'wb') as icfile:

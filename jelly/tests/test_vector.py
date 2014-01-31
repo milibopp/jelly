@@ -2,7 +2,7 @@
 
 from nose.tools import assert_equal
 
-from pyrepo.vector import *
+from jelly.vector import *
 
 
 def test_init():

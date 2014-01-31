@@ -8,10 +8,10 @@ from nose.tools import assert_equal, raises
 from tempfile import NamedTemporaryFile
 from hashlib import md5
 
-from pyrepo.ics import *
-from pyrepo.model import Cell, Mesh, UniformGas
-from pyrepo.util import CartesianGrid2D, CircularObstacle, Rectangle
-from pyrepo.vector import Vector
+from jelly.ics import *
+from jelly.model import Cell, Mesh, UniformGas
+from jelly.util import CartesianGrid2D, CircularObstacle, Rectangle
+from jelly.vector import Vector
 from .test_model import make_random_mesh, make_mesh_with_nbody_cell
 
 
