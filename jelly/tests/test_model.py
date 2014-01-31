@@ -3,9 +3,9 @@
 from nose.tools import assert_equal, raises
 import random
 
-from pyrepo.util import CartesianGrid2D, Rectangle, MonteCarloGrid2D
-from pyrepo.vector import Vector
-from pyrepo.model import *
+from jelly.util import CartesianGrid2D, Rectangle, MonteCarloGrid2D
+from jelly.vector import Vector
+from jelly.model import *
 
 
 class CustomObstacle(Obstacle):

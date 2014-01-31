@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Setup script for pyrepo."""
+"""Setup script for jelly."""
 
 from setuptools import setup
 

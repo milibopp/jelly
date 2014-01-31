@@ -2,9 +2,9 @@
 
 from nose.tools import assert_equal, raises
 
-from pyrepo.vector import Vector, dot
-from pyrepo.model import InconsistentGridError
-from pyrepo.util import *
+from jelly.vector import Vector, dot
+from jelly.model import InconsistentGridError
+from jelly.util import *
 
 
 def test_cartesian_grid_2d_iterate():
