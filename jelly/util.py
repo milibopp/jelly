@@ -59,6 +59,28 @@ class CartesianGrid2D(object):
         for kx, ky in product(range(nx), range(ny)):
             yield Vector((kx + 0.5) * dx / nx, (ky + 0.5) * dy / ny, 0.0)
 
+class CartesianGrid3D(object):
+    """
+    A 3D rectangular Cartesian grid spanning a rectangular *box*. The grid
+    resolution is given as a 3-tuple of the coordinate resolutions in x, y and
+    z direction.
+
+    Hydrodynamic quantities are given as a function of the position vector.
+
+    """
+
+    def __init__(self, box, resolution):
+        self.box = box
+        self.resolution = resolution
+
+    def __iter__(self):
+        """Iterate over the cartesian grid"""
+        nx, ny, nz = self.resolution
+        dx, dy, dz = self.box.size
+        for kx, ky, kz in product(range(nx), range(ny), range(nz)):
+            yield Vector((kx + 0.5) * dx / nx,
+                         (ky + 0.5) * dy / ny,
+                         (kz + 0.5) * dz / nz)
 
 class PolarGrid2D(object):
 
