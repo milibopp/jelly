@@ -44,12 +44,7 @@ def test_sub():
 def test_mul():
     """Multiply vector by scalar"""
     assert_equal(Vector(3, 1) * 2, Vector(6, 2))
-
-
-def test_mul():
-    """Multiply vector by scalar"""
     assert_equal(2 * Vector(3, 1), Vector(6, 2))
-
 
 def test_div():
     """Divide vector by scalar"""
