@@ -44,7 +44,6 @@ integer (uint).
 
 import struct
 from abc import ABCMeta
-from itertools import imap
 from operator import attrgetter
 
 from .model import ListCellCollection
@@ -176,7 +175,7 @@ def map_quantity(cells, attribute):
     The quantities are specified by the attribute name.
 
     """
-    return imap(attrgetter(attribute), cells)
+    return map(attrgetter(attribute), cells)
 
 
 def write_icfile(file_like, mesh):
