@@ -22,6 +22,9 @@ __pycache__
 # Installer logs
 pip-log.txt
 
+# Tox environments
+.tox
+
 # Test output data
 test.dat
 idl/test.dat

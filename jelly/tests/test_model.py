@@ -1,5 +1,6 @@
 """Tests of models"""
 
+from unittest import TestCase
 from nose.tools import assert_equal, raises
 import random
 
@@ -22,6 +23,18 @@ class CustomObstacle(Obstacle):
 
     def check(self):
         return True
+
+
+class TestCell(TestCase):
+
+    def test_init(self):
+        """Construct cell"""
+        cell = Cell(Vector(0, 1, -2), Vector(-3, 7, 4), 6.2, 3.1)
+        assert_equal(cell.position, Vector(0, 1, -2))
+        assert_equal(cell.velocity, Vector(-3, 7, 4))
+        assert_equal(cell.density, 6.2)
+        assert_equal(cell.internal_energy, 3.1)
+        assert_equal(cell.category, 'normal')
 
 
 def make_random_mesh(ncells=10):
