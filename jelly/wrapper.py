@@ -77,6 +77,19 @@ class ParameterSetup(dict):
                     parameters[key] = value
         return parameters
 
+    def render_mesh(self, mesh):
+        """
+        Render a mesh into the initial conditions file
+
+        The initial conditions file is specified as the parameter
+        "InitCondFile" in the parameter setup. This function overwrites the
+        file with the initial conditions specified by the mesh supplied.
+
+        """
+        # Write initial conditions binary
+        with open(self['InitCondFile'], 'wb') as icfile:
+            write_icfile(icfile, mesh)
+
     def write(self, file_name):
         """Writes the parameters to a file."""
         with open(file_name, 'w') as param_file:
@@ -266,7 +279,7 @@ class ArepoRun(object):
             raise RuntimeError(
                 'Arepo compilation failed (exit code: {})'.format(retcode))
 
-    def run(self, parameters, initial_conditions):
+    def run(self, parameters):
         """
         Run the simulation with given parameter setup and initial conditions.
 
@@ -277,9 +290,6 @@ class ArepoRun(object):
         # Write parameter file
         pfile = 'jelly-params.txt'
         parameters.write(pfile)
-        # Write initial conditions binary
-        with open(parameters['InitCondFile'], 'wb') as icfile:
-            write_icfile(icfile, initial_conditions)
         # Run the simulation
         subprocess.call(['mpirun', '-np', str(self.proc_count),
             '.arepo/Arepo', pfile])
