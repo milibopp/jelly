@@ -37,6 +37,8 @@ class Vector(object):
     def __div__(self, scalar):
         return Vector(*(x / scalar for x in self.values))
 
+    __truediv__ = __div__
+
     def __abs__(self):
         return sum(x ** 2 for x in self.values) ** 0.5
 

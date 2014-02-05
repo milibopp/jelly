@@ -12,5 +12,5 @@ if __name__ == '__main__':
         author='Eduard Bopp',
         author_email='eduard.bopp@aepsil0n.de',
         packages=['jelly'],
-        install_requires=['numpy'],
+        install_requires=['numpy', 'six'],
     )

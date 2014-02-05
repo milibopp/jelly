@@ -161,21 +161,6 @@ class ListCellCollection(list, CellCollection):
         Do a self-consistency check. Should raise an exception upon
         encountering anomalies.
 
-        >>> cells = [Cell((0, 9, 2), (3, 4, 5), 1.1, 2.0),
-        ...          Cell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
-        >>> collection = ListCellCollection(cells)
-        >>> collection.check()
-
-        For instance, identical positions are not allowed:
-
-        >>> cells = [Cell((0, 1, 2), (3, 4, 5), 1.1, 2.0),
-        ...          Cell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
-        >>> collection = ListCellCollection(cells)
-        >>> collection.check()
-        Traceback (most recent call last):
-            ...
-        InconsistentGridError: multiple cell position (0.0, 1.0, 2.0)
-
         """
         positions = set()
         for cell in self:
