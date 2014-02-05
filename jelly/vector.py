@@ -11,7 +11,7 @@ class Vector(object):
         return self.__values
 
     def __repr__(self):
-        return 'Vector{}'.format(self.__values)
+        return 'Vector{0}'.format(self.__values)
 
     def __getitem__(self, key):
         return self.__values[key]
