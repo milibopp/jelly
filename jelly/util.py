@@ -156,12 +156,6 @@ class CircularObstacle(Obstacle):
         """
         Checks whether a given position is inside the circle's domain.
 
-        >>> circle = CircularObstacle((0.0, 0.0), 1.0)
-        >>> circle.inside((2.0, 0.0))
-        False
-        >>> circle.inside((0.0, 0.0))
-        True
-
         """
         dist = sum((self.center[i] - position[i]) ** 2.0 for i in [0, 1]) ** 0.5
         extra_space = 1.5 * self.__angle_segment

@@ -24,20 +24,6 @@ class Cell(object):
     default category is 'normal', cells making up solid obstacles are
     categorized as 'solid'.
 
-    Usage:
-
-    >>> cell = Cell((0, 1, -2), (-3, 7, 4), 6.2, 3.1)
-    >>> cell.position
-    (0, 1, -2)
-    >>> cell.velocity
-    (-3, 7, 4)
-    >>> cell.density
-    6.2
-    >>> cell.internal_energy
-    3.1
-    >>> cell.category
-    'normal'
-
     """
 
     def __init__(self, position, velocity, density, internal_energy,

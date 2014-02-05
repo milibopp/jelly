@@ -47,9 +47,6 @@ class ParameterSetup(dict):
         """
         Matches a line.
 
-        >>> ParameterSetup._match_line('OutputDir output/')
-        ('OutputDir', 'output/')
-
         """
         match = re.match(ParameterSetup.__regex_comment, line)
         if match:
@@ -62,10 +59,6 @@ class ParameterSetup(dict):
     def from_file(cls, file_name):
         """
         Loads the parameter setup from a file.
-
-        >>> setup = ParameterSetup.from_file('test_data/stub_params.txt')
-        >>> setup['EnergyFile']
-        'energy.txt'
 
         """
         parameters = cls()
@@ -113,15 +106,6 @@ class CompilerOptions(dict):
         """
         Matches a line.
 
-        >>> CompilerOptions._match_line('test=3')
-        ('test', '3')
-        >>> CompilerOptions._match_line(' param =   5 # comment')
-        ('param', '5')
-        >>> CompilerOptions._match_line('# only comment') is None
-        True
-        >>> CompilerOptions._match_line('flag')
-        ('flag', True)
-
         """
         match = re.match(CompilerOptions.__regex_comment, line)
         if match:
@@ -138,9 +122,6 @@ class CompilerOptions(dict):
         """
         Alternative constructor loading the compiler options from a standard
         Arepo config file.
-
-        >>> CompilerOptions.from_file('test_data/stub_config.sh')
-        CompilerOptions({'PERIODIC': True, 'NTYPES': '6'})
 
         """
         options = cls()
@@ -163,8 +144,7 @@ class CompilerOptions(dict):
 
     def __repr__(self):
         """
-        >>> CompilerOptions(a=3, b=4)
-        CompilerOptions({'a': 3, 'b': 4})
+        String representation of compiler configuration
 
         """
         return '{}({})'.format(self.__class__.__name__, dict.__repr__(self))
