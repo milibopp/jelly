@@ -147,7 +147,7 @@ class CompilerOptions(dict):
         String representation of compiler configuration
 
         """
-        return '{}({})'.format(self.__class__.__name__, dict.__repr__(self))
+        return '{0}({1})'.format(self.__class__.__name__, dict.__repr__(self))
 
 
 class ArepoInstallation(object):

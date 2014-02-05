@@ -181,7 +181,7 @@ class ListCellCollection(list, CellCollection):
         for cell in self:
             pos = tuple(float(x) for x in cell.position[:3])
             if pos in positions:
-                raise InconsistentGridError('multiple cell position {}'.format(pos))
+                raise InconsistentGridError('multiple cell position {0}'.format(pos))
             positions.add(pos)
 
 
