@@ -24,20 +24,6 @@ class Cell(object):
     default category is 'normal', cells making up solid obstacles are
     categorized as 'solid'.
 
-    Usage:
-
-    >>> cell = Cell((0, 1, -2), (-3, 7, 4), 6.2, 3.1)
-    >>> cell.position
-    (0, 1, -2)
-    >>> cell.velocity
-    (-3, 7, 4)
-    >>> cell.density
-    6.2
-    >>> cell.internal_energy
-    3.1
-    >>> cell.category
-    'normal'
-
     """
 
     def __init__(self, position, velocity, density, internal_energy,
@@ -175,27 +161,12 @@ class ListCellCollection(list, CellCollection):
         Do a self-consistency check. Should raise an exception upon
         encountering anomalies.
 
-        >>> cells = [Cell((0, 9, 2), (3, 4, 5), 1.1, 2.0),
-        ...          Cell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
-        >>> collection = ListCellCollection(cells)
-        >>> collection.check()
-
-        For instance, identical positions are not allowed:
-
-        >>> cells = [Cell((0, 1, 2), (3, 4, 5), 1.1, 2.0),
-        ...          Cell((0, 1, 2), (-3, 7, 5), 1.3, 1.7)]
-        >>> collection = ListCellCollection(cells)
-        >>> collection.check()
-        Traceback (most recent call last):
-            ...
-        InconsistentGridError: multiple cell position (0.0, 1.0, 2.0)
-
         """
         positions = set()
         for cell in self:
             pos = tuple(float(x) for x in cell.position[:3])
             if pos in positions:
-                raise InconsistentGridError('multiple cell position {}'.format(pos))
+                raise InconsistentGridError('multiple cell position {0}'.format(pos))
             positions.add(pos)
 
 

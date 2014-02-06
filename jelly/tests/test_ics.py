@@ -7,6 +7,7 @@ import struct
 from nose.tools import assert_equal, raises
 from tempfile import NamedTemporaryFile
 from hashlib import md5
+import six
 
 from jelly.ics import *
 from jelly.model import Cell, Mesh, UniformGas
@@ -17,26 +18,26 @@ from .test_model import make_random_mesh, make_mesh_with_nbody_cell
 
 def test_make_f77_block():
     """Plain F77-unformatted block"""
-    f77_block = make_f77_block(bytes('asdf'))
+    f77_block = make_f77_block(six.b('asdf'))
     assert_equal(
         f77_block,
-        '\x04\x00\x00\x00asdf\x04\x00\x00\x00'
+        six.b('\x04\x00\x00\x00asdf\x04\x00\x00\x00')
     )
 
 
 def test_make_f77_block_padded():
     """F77-unformatted block with padding"""
-    f77_block_padded = make_f77_block(bytes('asdf'), 10)
+    f77_block_padded = make_f77_block(six.b('asdf'), 10)
     assert_equal(
         f77_block_padded,
-        '\x0a\x00\x00\x00asdf\x00\x00\x00\x00\x00\x00\x0a\x00\x00\x00'
+        six.b('\x0a\x00\x00\x00asdf\x00\x00\x00\x00\x00\x00\x0a\x00\x00\x00')
     )
 
 
 @raises(ValueError)
 def test_make_f77_block_padding_too_small():
     """F77-unformatted block with too small padding"""
-    f77_block_padded = make_f77_block(bytes('blah'), 2)
+    f77_block_padded = make_f77_block(six.b('blah'), 2)
 
 
 def test_make_header():
@@ -53,20 +54,20 @@ def test_make_header():
         num_files=1,
         box_size=1.0
     )
-    assert_equal(header[4:8], '\x64' + '\x00' * 3)
-    assert_equal(header[8:28], '\x00' * 20)
-    assert_equal(header[100:104], '\x64' + '\x00' * 3)
-    assert_equal(header[128:132], '\x01' + '\x00' * 3)
+    assert_equal(header[4:8], six.b('\x64') + six.b('\x00') * 3)
+    assert_equal(header[8:28], six.b('\x00') * 20)
+    assert_equal(header[100:104], six.b('\x64') + six.b('\x00') * 3)
+    assert_equal(header[128:132], six.b('\x01') + six.b('\x00') * 3)
     assert_equal(len(header), 264)
 
 
 def test_make_default_header():
     """Make a default header block"""
     header = make_default_header((100, 0, 0, 4, 0, 0), 1.0, 0.0)
-    assert_equal(header[4:8], '\x64' + '\x00' * 3)
-    assert_equal(header[16:20], '\x04' + '\x00' * 3)
-    assert_equal(header[100:104], '\x64' + '\x00' * 3)
-    assert_equal(header[128:132], '\x01' + '\x00' * 3)
+    assert_equal(header[4:8], six.b('\x64') + six.b('\x00') * 3)
+    assert_equal(header[16:20], six.b('\x04') + six.b('\x00') * 3)
+    assert_equal(header[100:104], six.b('\x64') + six.b('\x00') * 3)
+    assert_equal(header[128:132], six.b('\x01') + six.b('\x00') * 3)
     assert_equal(len(header), 264)
 
 
@@ -92,7 +93,7 @@ def test_body_block_scalar():
 def test_iterate_ids_simple():
     """Generate IDs for plain mesh"""
     id_iter = iterate_ids(make_random_mesh().cells)
-    assert_equal(list(id_iter), range(1, 11))
+    assert_equal(list(id_iter), list(range(1, 11)))
 
 
 def _mesh_with_obstacle():
@@ -112,9 +113,9 @@ def test_iterate_ids_obstacle():
         if mesh.obstacles[0].inside(cell.position):
             assert id_ >= 30000000
     # Total numbers of cells with certain ID ranges
-    assert_equal(len(filter(lambda id_: 40000000 > id_ >= 30000000, ids)), 12)
-    assert_equal(len(filter(lambda id_: id_ >= 40000000, ids)), 12)
-    assert_equal(len(filter(lambda id_: id_ < 30000000, ids)), 88)
+    assert_equal(len(list(filter(lambda id_: 40000000 > id_ >= 30000000, ids))), 12)
+    assert_equal(len(list(filter(lambda id_: id_ >= 40000000, ids))), 12)
+    assert_equal(len(list(filter(lambda id_: id_ < 30000000, ids))), 88)
 
 
 def test_count_types():
@@ -161,7 +162,7 @@ def test_iterate_ids_with_nbody():
     mesh = make_mesh_with_nbody_cell(10)
     ids = list(iterate_ids(mesh.cells))
     assert_equal(len(ids), 101)
-    assert_equal(ids, range(1, 102))
+    assert_equal(ids, list(range(1, 102)))
 
 
 def test_write_ics_with_nbody_md5():

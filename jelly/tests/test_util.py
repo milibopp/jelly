@@ -1,6 +1,7 @@
 """Tests of utilities"""
 
-from nose.tools import assert_equal, raises
+from nose.tools import assert_equal, assert_true, assert_false, raises
+from unittest import TestCase
 
 from jelly.vector import Vector, dot
 from jelly.model import InconsistentGridError
@@ -33,3 +34,16 @@ def test_cartesian_grid_3d_iterate():
         for y in (0.25, 0.75):
             for z in (0.25, 0.75, 1.25, 1.75):
                 assert Vector(x, y, z) in grid
+
+
+class TestCircularObstacle(TestCase):
+    """
+    Test of CircularObstacle class
+
+    """
+
+    def test_inside(self):
+        """Inside-circle checks"""
+        circle = CircularObstacle((0.0, 0.0), 1.0)
+        assert_false(circle.inside((2.0, 0.0)))
+        assert_true(circle.inside((0.0, 0.0)))

@@ -43,8 +43,8 @@ integer (uint).
 """
 
 import struct
+import six
 from abc import ABCMeta
-from itertools import imap
 from operator import attrgetter
 
 from .model import ListCellCollection
@@ -66,7 +66,7 @@ def make_f77_block(raw_block, pad=None):
         suffix = struct.pack('i', pad)
         if pad < size:
             raise ValueError('padding too small for data')
-        padding = '\x00' * (pad - size)
+        padding = six.b('\x00') * (pad - size)
         return suffix + raw_block + padding + suffix
     else:
         suffix = struct.pack('i', size)
@@ -176,7 +176,7 @@ def map_quantity(cells, attribute):
     The quantities are specified by the attribute name.
 
     """
-    return imap(attrgetter(attribute), cells)
+    return map(attrgetter(attribute), cells)
 
 
 def write_icfile(file_like, mesh):

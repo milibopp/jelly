@@ -11,7 +11,7 @@ class Vector(object):
         return self.__values
 
     def __repr__(self):
-        return 'Vector{}'.format(self.__values)
+        return 'Vector{0}'.format(self.__values)
 
     def __getitem__(self, key):
         return self.__values[key]
@@ -36,6 +36,8 @@ class Vector(object):
 
     def __div__(self, scalar):
         return Vector(*(x / scalar for x in self.values))
+
+    __truediv__ = __div__
 
     def __abs__(self):
         return sum(x ** 2 for x in self.values) ** 0.5
