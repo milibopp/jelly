@@ -60,8 +60,11 @@ class CartesianGrid2D(object):
         """Iterate over the cartesian grid"""
         nx, ny = self.resolution
         dx, dy = self.box.size
+        offset_x, offset_y = self.box.position
+
         for kx, ky in product(range(nx), range(ny)):
-            yield Vector((kx + 0.5) * dx / nx, (ky + 0.5) * dy / ny, 0.0)
+            yield Vector((kx + 0.5) * dx / nx + offset_x, (ky + 0.5) * dy / ny + offset_y, 0.0)
+
 
 class CartesianGrid3D(object):
     """
@@ -82,9 +85,11 @@ class CartesianGrid3D(object):
         nx, ny, nz = self.resolution
         dx, dy, dz = self.cube.size
         for kx, ky, kz in product(range(nx), range(ny), range(nz)):
-            yield Vector((kx + 0.5) * dx / nx,
-                         (ky + 0.5) * dy / ny,
-                         (kz + 0.5) * dz / nz)
+            yield self.cube.position +\
+                Vector((kx + 0.5) * dx / nx,
+                       (ky + 0.5) * dy / ny,
+                       (kz + 0.5) * dz / nz)
+
 
 class PolarGrid2D(object):
 
