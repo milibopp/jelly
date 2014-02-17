@@ -10,7 +10,7 @@ import sys
 
 from jelly.ics import write_icfile
 from jelly.model import Mesh, UniformGas
-from jelly.util import CartesianGrid2D, Rectangle
+from jelly.util import CartesianGrid2D, nCube
 from jelly.vector import Vector
 
 
@@ -22,7 +22,7 @@ gas = UniformGas(
 
 # Setup a grid to approximate the continuous gas
 grid = CartesianGrid2D(
-        Rectangle(Vector(0.0, 0.0), Vector(1.0, 1.0)),
+        nCube(Vector(0.0, 0.0), Vector(1.0, 1.0)),
         (32, 32))
 
 # Combine everything into a mesh

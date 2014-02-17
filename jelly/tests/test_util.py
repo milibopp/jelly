@@ -11,7 +11,7 @@ from jelly.util import *
 def test_cartesian_grid_2d_iterate():
     """Concrete iterated values in a 2D Cartesian grid"""
     grid = CartesianGrid2D(
-        Rectangle(Vector(0.0, 0.0), Vector(1.0, 1.0)), (2, 2))
+        nCube(Vector(0.0, 0.0), Vector(1.0, 1.0)), (2, 2))
     all_vectors = [v for v in grid]
 
     assert_equal(len(all_vectors), 2*2)
@@ -24,7 +24,7 @@ def test_cartesian_grid_2d_iterate():
 def test_cartesian_grid_3d_iterate():
     """Concrete iterated values in a 3D Cartesian grid"""
     grid = CartesianGrid3D(
-        Rectangle(Vector(0.0, 0.0, 0.0), Vector(1.0, 1.0, 2.0)), (2, 2, 4))
+        nCube(Vector(0.0, 0.0, 0.0), Vector(1.0, 1.0, 2.0)), (2, 2, 4))
 
     all_vectors = [v for v in grid]
 

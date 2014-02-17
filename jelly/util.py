@@ -14,9 +14,12 @@ import numpy as np
 from .model import CellCollection, Cell, Obstacle, InconsistentGridError, UniformGas
 from .vector import Vector
 
+'''
+An axis-parallel n-Cube, with the 'bottom-right' cornar at *position* and *size*.
 
-Rectangle = namedtuple('Rectangle', ['position', 'size'])
-
+*Position* and *size* should have the same dimensions.
+'''
+nCube = namedtuple('nCube', ['position', 'size'])
 
 class MonteCarloGrid2D(object):
     """
@@ -46,6 +49,7 @@ class CartesianGrid2D(object):
 
     Hydrodynamic quantities are given as a function of the position vector.
 
+    The returned vector has three dimensions.
     """
 
     def __init__(self, box, resolution):
@@ -61,7 +65,7 @@ class CartesianGrid2D(object):
 
 class CartesianGrid3D(object):
     """
-    A 3D rectangular Cartesian grid spanning a rectangular *box*. The grid
+    A 3D rectangular Cartesian grid spanning a *cube*. The grid
     resolution is given as a 3-tuple of the coordinate resolutions in x, y and
     z direction.
 
@@ -69,14 +73,14 @@ class CartesianGrid3D(object):
 
     """
 
-    def __init__(self, box, resolution):
-        self.box = box
+    def __init__(self, cube, resolution):
+        self.cube = cube
         self.resolution = resolution
 
     def __iter__(self):
         """Iterate over the cartesian grid"""
         nx, ny, nz = self.resolution
-        dx, dy, dz = self.box.size
+        dx, dy, dz = self.cube.size
         for kx, ky, kz in product(range(nx), range(ny), range(nz)):
             yield Vector((kx + 0.5) * dx / nx,
                          (ky + 0.5) * dy / ny,

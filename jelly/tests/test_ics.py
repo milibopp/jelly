@@ -11,7 +11,7 @@ import six
 
 from jelly.ics import *
 from jelly.model import Cell, Mesh, UniformGas
-from jelly.util import CartesianGrid2D, CircularObstacle, Rectangle
+from jelly.util import CartesianGrid2D, CircularObstacle, nCube
 from jelly.vector import Vector
 from .test_model import make_random_mesh, make_mesh_with_nbody_cell
 
@@ -98,7 +98,7 @@ def test_iterate_ids_simple():
 
 def _mesh_with_obstacle():
     """Generate a mesh with obstacles for testing"""
-    grid = CartesianGrid2D(Rectangle(Vector(0, 0), Vector(2, 2)), (10, 10))
+    grid = CartesianGrid2D(nCube(Vector(0, 0), Vector(2, 2)), (10, 10))
     circle = CircularObstacle((1, 1), 0.2, n_phi=12)
     return Mesh(UniformGas(), grid, [circle])
 
