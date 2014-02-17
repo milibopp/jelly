@@ -50,6 +50,7 @@ class CartesianGrid2D(object):
     Hydrodynamic quantities are given as a function of the position vector.
 
     The returned vector has three dimensions.
+
     """
 
     def __init__(self, box, resolution):
