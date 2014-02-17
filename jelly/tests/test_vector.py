@@ -1,6 +1,6 @@
 """Tests of vector class"""
 
-from nose.tools import assert_equal
+from nose.tools import assert_equal, raises
 
 from jelly.vector import *
 
@@ -70,3 +70,18 @@ def test_cross():
     """Cross product of two vectors"""
     assert_equal(cross(Vector(1, 0, 0), Vector(0, 1, 0)), Vector(0, 0, 1))
     assert_equal(cross(Vector(1, 3, 2), Vector(-1, 1, 0)), Vector(-2, -2, 4))
+
+@raises(DimensionalityError)
+def test_add_different_sizes():
+    """Add vectors of different sizes"""
+    Vector(1.0) + Vector(2.0, 3.0)
+
+@raises(DimensionalityError)
+def test_subtract_different_sizes():
+    """Subtract vectors of different sizes"""
+    Vector(1.0) - Vector(2.0, 3.0)
+
+@raises(DimensionalityError)
+def test_dot_different_sizes():
+    """Dot multiply vectors of different sizes"""
+    dot(Vector(1.0), Vector(2.0, 3.0))
