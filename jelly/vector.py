@@ -1,5 +1,8 @@
 """Vector arithmetics"""
 
+class DimensionalityError(Exception):
+    """An exception raised, when the operation needs object of the same dimensionality, but it is different."""
+    pass
 
 class Vector(object):
 
@@ -9,6 +12,10 @@ class Vector(object):
     @property
     def values(self):
         return self.__values
+
+    def _assert_same_dimensionality(self, other):
+        if len(self) != len(other):
+            raise DimensionalityError("Vectors don't have the same size")
 
     def __repr__(self):
         return 'Vector{0}'.format(self.__values)
@@ -23,9 +30,11 @@ class Vector(object):
         return self.values == other.values
 
     def __add__(self, other):
+        self._assert_same_dimensionality(other)
         return Vector(*(a + b for a, b in zip(self.values, other.values)))
 
     def __sub__(self, other):
+        self._assert_same_dimensionality(other)
         return Vector(*(a - b for a, b in zip(self.values, other.values)))
 
     def __mul__(self, scalar):
@@ -48,6 +57,7 @@ class Vector(object):
 
 def dot(v1, v2):
     """Dot product of two vectors"""
+    v1._assert_same_dimensionality(v2)
     return sum(a * b for a, b in zip(v1.values, v2.values))
 
 
