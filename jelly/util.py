@@ -14,9 +14,12 @@ import numpy as np
 from .model import CellCollection, Cell, Obstacle, InconsistentGridError, UniformGas
 from .vector import Vector
 
+'''
+An axis-parallel box, with the 'bottom-right' corner at *position* and spans *size*.
 
-Rectangle = namedtuple('Rectangle', ['position', 'size'])
-
+*Position* and *size* must have the same dimensions.
+'''
+Box = namedtuple('Box', ['position', 'size'])
 
 class MonteCarloGrid2D(object):
     """
@@ -46,6 +49,8 @@ class CartesianGrid2D(object):
 
     Hydrodynamic quantities are given as a function of the position vector.
 
+    The returned vector has three dimensions.
+
     """
 
     def __init__(self, box, resolution):
@@ -56,12 +61,15 @@ class CartesianGrid2D(object):
         """Iterate over the cartesian grid"""
         nx, ny = self.resolution
         dx, dy = self.box.size
+        offset_x, offset_y = self.box.position
+
         for kx, ky in product(range(nx), range(ny)):
-            yield Vector((kx + 0.5) * dx / nx, (ky + 0.5) * dy / ny, 0.0)
+            yield Vector((kx + 0.5) * dx / nx + offset_x, (ky + 0.5) * dy / ny + offset_y, 0.0)
+
 
 class CartesianGrid3D(object):
     """
-    A 3D rectangular Cartesian grid spanning a rectangular *box*. The grid
+    A 3D rectangular Cartesian grid spanning a *cube*. The grid
     resolution is given as a 3-tuple of the coordinate resolutions in x, y and
     z direction.
 
@@ -70,17 +78,19 @@ class CartesianGrid3D(object):
     """
 
     def __init__(self, box, resolution):
-        self.box = box
+        self.cube = box
         self.resolution = resolution
 
     def __iter__(self):
         """Iterate over the cartesian grid"""
         nx, ny, nz = self.resolution
-        dx, dy, dz = self.box.size
+        dx, dy, dz = self.cube.size
         for kx, ky, kz in product(range(nx), range(ny), range(nz)):
-            yield Vector((kx + 0.5) * dx / nx,
-                         (ky + 0.5) * dy / ny,
-                         (kz + 0.5) * dz / nz)
+            yield self.cube.position +\
+                Vector((kx + 0.5) * dx / nx,
+                       (ky + 0.5) * dy / ny,
+                       (kz + 0.5) * dz / nz)
+
 
 class PolarGrid2D(object):
 
