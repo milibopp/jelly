@@ -8,14 +8,14 @@ conditions.
 
 from jelly.ics import write_icfile
 from jelly.model import Mesh, UniformGas
-from jelly.util import CartesianGrid2D, nCube, CircularObstacle
+from jelly.util import CartesianGrid2D, Box, CircularObstacle
 from jelly.vector import Vector
 
 
 # Setup gas and grid
 gas = UniformGas()
 grid = CartesianGrid2D(
-        nCube(Vector(0.0, 0.0), Vector(1.0, 1.0)),
+        Box(Vector(0.0, 0.0), Vector(1.0, 1.0)),
         (32, 32))
 
 # Setup a circular obstacle

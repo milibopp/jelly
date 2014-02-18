@@ -4,7 +4,7 @@ from unittest import TestCase
 from nose.tools import assert_equal, raises
 import random
 
-from jelly.util import CartesianGrid2D, nCube, MonteCarloGrid2D
+from jelly.util import CartesianGrid2D, Box, MonteCarloGrid2D
 from jelly.vector import Vector
 from jelly.model import *
 
@@ -41,7 +41,7 @@ def make_random_mesh(ncells=10):
     return Mesh(
         UniformGas(),
         MonteCarloGrid2D(
-            nCube(Vector(0, 0), Vector(1, 1)),
+            Box(Vector(0, 0), Vector(1, 1)),
             ncells
         )
     )
@@ -58,7 +58,7 @@ def make_mesh_with_nbody_cell(gridres=32):
     return Mesh(
         UniformGas(),
         CartesianGrid2D(
-            nCube(Vector(0.0, 0.0), Vector(4.0, 4.0)),
+            Box(Vector(0.0, 0.0), Vector(4.0, 4.0)),
             (gridres, gridres)),
         extras=[ListCellCollection([nbody_cell])])
 
@@ -107,6 +107,6 @@ def test_create_gas_category():
 
 
 def test_approximate_gas_plain():
-    grid = CartesianGrid2D(nCube(Vector(0, 0), Vector(1, 1)), (2, 2))
+    grid = CartesianGrid2D(Box(Vector(0, 0), Vector(1, 1)), (2, 2))
     cells = list(approximate_gas(UniformGas(), grid))
     assert_equal(cells[0].position, Vector(0.25, 0.25, 0.0))

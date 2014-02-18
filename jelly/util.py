@@ -15,11 +15,11 @@ from .model import CellCollection, Cell, Obstacle, InconsistentGridError, Unifor
 from .vector import Vector
 
 '''
-An axis-parallel n-Cube, with the 'bottom-right' cornar at *position* and *size*.
+An axis-parallel box, with the 'bottom-right' corner at *position* and spans *size*.
 
-*Position* and *size* should have the same dimensions.
+*Position* and *size* must have the same dimensions.
 '''
-nCube = namedtuple('nCube', ['position', 'size'])
+Box = namedtuple('Box', ['position', 'size'])
 
 class MonteCarloGrid2D(object):
     """
@@ -77,8 +77,8 @@ class CartesianGrid3D(object):
 
     """
 
-    def __init__(self, cube, resolution):
-        self.cube = cube
+    def __init__(self, box, resolution):
+        self.cube = box
         self.resolution = resolution
 
     def __iter__(self):

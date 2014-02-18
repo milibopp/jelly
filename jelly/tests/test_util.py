@@ -11,7 +11,7 @@ from jelly.util import *
 def test_cartesian_grid_2d_iterate():
     """Concrete iterated values in a 2D Cartesian grid"""
     grid = CartesianGrid2D(
-        nCube(Vector(0.0, 0.0), Vector(1.0, 1.0)), (2, 2))
+        Box(Vector(0.0, 0.0), Vector(1.0, 1.0)), (2, 2))
     all_vectors = [v for v in grid]
 
     assert_equal(len(all_vectors), 2*2)
@@ -26,7 +26,7 @@ def test_cartesian_grid_2d_iterate_with_offset():
     offset2d = Vector(2.0, -1.5)
     offset3d = Vector(2.0, -1.5, 0.0)
     grid = CartesianGrid2D(
-        nCube(offset2d, Vector(1.0, 1.0)), (2, 2))
+        Box(offset2d, Vector(1.0, 1.0)), (2, 2))
     all_vectors = [v for v in grid]
 
     assert_equal(len(all_vectors), 2*2)
@@ -39,7 +39,7 @@ def test_cartesian_grid_2d_iterate_with_offset():
 def test_cartesian_grid_3d_iterate():
     """Concrete iterated values in a 3D Cartesian grid"""
     grid = CartesianGrid3D(
-        nCube(Vector(0.0, 0.0, 0.0), Vector(1.0, 1.0, 2.0)), (2, 2, 4))
+        Box(Vector(0.0, 0.0, 0.0), Vector(1.0, 1.0, 2.0)), (2, 2, 4))
 
     all_vectors = [v for v in grid]
 
@@ -55,7 +55,7 @@ def test_cartesian_grid_3d_iterate_with_offset():
     offset = Vector(1.0, 2.0, -3.0)
 
     grid = CartesianGrid3D(
-        nCube(offset, Vector(8.0, 4.0, 6.0)), (2, 2, 3))
+        Box(offset, Vector(8.0, 4.0, 6.0)), (2, 2, 3))
 
     all_vectors = [v for v in grid]
 
