@@ -82,6 +82,8 @@ class ParameterSetup(dict):
         # Write initial conditions binary
         with open(self['InitCondFile'], 'wb') as icfile:
             write_icfile(icfile, mesh)
+        # Set the parameters depending on the mesh correctly
+        self['BoxSize'] = mesh.boxsize
 
     def write(self, file_name):
         """Writes the parameters to a file."""
