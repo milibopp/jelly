@@ -9,7 +9,6 @@ from itertools import product
 from math import pi, sin, cos
 from collections import namedtuple
 from random import uniform
-import numpy as np
 
 from .model import CellCollection, Cell, Obstacle, InconsistentGridError, UniformGas
 from .vector import Vector
@@ -92,7 +91,17 @@ class CartesianGrid3D(object):
                        (kz + 0.5) * dz / nz)
 
 
+
 class PolarGrid2D(object):
+    """
+    A 2D grid resembling polar coordinates
+
+    Within radial *boundaries* around the *center* radii are sampled with equal
+    spacing given by *resolution*. For each annulus, the azimuthal direction is
+    sampled with the same equal spacing to achieve a homogenous distribution of
+    grid points.
+
+    """
 
     def __init__(self, center, boundaries, resolution):
         self.center = center
@@ -101,8 +110,12 @@ class PolarGrid2D(object):
 
     def __iter__(self):
         a, b = self.boundaries
-        for r in np.arange(a, b, self.resolution):
-            for phi in np.linspace(0.0, 2*pi, (2*pi*r/self.resolution), endpoint=False):
+        r_step = self.resolution
+        n_r = int((b - a) / self.resolution)
+        for r in [a + r_step * n for n in range(n_r)]:
+            n_phi = int(2 * pi * r / self.resolution)
+            phi_step = 2 * pi / n_phi
+            for phi in [phi_step * n for n in range(n_phi)]:
                 yield self.center + Vector(r*cos(phi), r*sin(phi), 0.0)
 
 
