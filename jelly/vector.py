@@ -29,6 +29,9 @@ class Vector(object):
     def __eq__(self, other):
         return self.values == other.values
 
+    def __hash__(self):
+        return hash(self.__values)
+
     def __add__(self, other):
         self._assert_same_dimensionality(other)
         return Vector(*(a + b for a, b in zip(self.values, other.values)))
