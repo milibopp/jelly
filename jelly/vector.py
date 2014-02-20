@@ -27,7 +27,13 @@ class Vector(object):
         return len(self.__values)
 
     def __eq__(self, other):
-        return self.values == other.values
+        if isinstance(other, Vector):
+            return self.values == other.values
+        return False
+
+    def __ne__(self, other):
+        result = self.__eq__(other)
+        return not result
 
     def __hash__(self):
         return hash(self.__values)
@@ -56,7 +62,6 @@ class Vector(object):
 
     def unit(self):
         return self / abs(self)
-
 
 def dot(v1, v2):
     """Dot product of two vectors"""

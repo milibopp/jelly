@@ -1,6 +1,6 @@
 """Tests of vector class"""
 
-from nose.tools import assert_equal, raises
+from nose.tools import assert_equal, raises, assert_false, assert_true
 
 from jelly.vector import *
 
@@ -26,9 +26,38 @@ def test_getitem():
     assert_equal(Vector(2, 1)[1], 1)
 
 
-def test_equality():
+def test_equal():
     """Equality of vectors"""
-    assert_equal(Vector(2, 1), Vector(2, 1))
+    assert_true(Vector(1.0, 2.0) == Vector(1.0, 2.0))
+    assert_false(Vector(1.0, 2.0) == Vector(0.0, 0.0))
+
+
+def test_not_equal():
+    """Not-equality of vectors"""
+    assert_false(Vector(1.0, 2.0) != Vector(1.0, 2.0))
+    assert_true(Vector(1.0, 2.0) != Vector(0.0, 0.0))
+
+
+def test_equal_same_reference():
+    """Equality for the same vector"""
+    v = Vector(1.0)
+    assert_true(v == v)
+
+
+def test_not_equal_same_reference():
+    """Non-equality for the same vector"""
+    v = Vector(1.0)
+    assert_false(v != v)
+
+
+def test_equal_with_different_type():
+    """Equality with different type"""
+    assert_false(Vector(1.0) == 1.0)
+
+
+def test_not_equal_with_different_type():
+    """Non-equality with different type"""
+    assert_true(Vector(1.0) != 1.0)
 
 
 def test_add():
@@ -75,6 +104,7 @@ def test_cross():
     """Cross product of two vectors"""
     assert_equal(cross(Vector(1, 0, 0), Vector(0, 1, 0)), Vector(0, 0, 1))
     assert_equal(cross(Vector(1, 3, 2), Vector(-1, 1, 0)), Vector(-2, -2, 4))
+
 
 @raises(DimensionalityError)
 def test_add_different_sizes():
