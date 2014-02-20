@@ -1,7 +1,9 @@
 """Tests of utilities"""
 
-from nose.tools import assert_equal, assert_true, assert_false, raises
+from nose.tools import (
+    assert_equal, assert_true, assert_false, raises, assert_in)
 from unittest import TestCase
+from math import pi, cos, sin
 
 from jelly.vector import Vector, dot
 from jelly.model import InconsistentGridError
@@ -65,6 +67,21 @@ def test_cartesian_grid_3d_iterate_with_offset():
         for y in (1.0, 3.0):
             for z in (1.0, 3.0, 5.0):
                 assert Vector(x, y, z) + offset in grid
+
+
+def test_polar_grid_2d_radii():
+    """Radii of PolarGrid2D"""
+    grid = PolarGrid2D(Vector(0.0, 0.0, 0.0), (0.1, 1.0), 0.1)
+    for r in [0.1, 0.2, 1.0]:
+        assert_in(Vector(0.1, 0.0, 0.0), grid)
+
+
+def test_polar_grid_2d_azimuths():
+    """Azimuths of PolarGrid2D"""
+    grid = PolarGrid2D(Vector(0.0, 0.0, 0.0), (0.1, 1.0), 0.1)
+    phi_step = 2 * pi / 31
+    for phi in [k * phi_step for k in (0, 1, 2, 30)]:
+        assert_in(Vector(0.5 * cos(phi), 0.5 * sin(phi), 0.0), grid)
 
 
 class TestCircularObstacle(TestCase):
