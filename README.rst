@@ -11,6 +11,13 @@ Currently it only supports the hydrodynamics software `Arepo`_. It might be
 extended to similar software as well.
 
 
+Code status
+-----------
+
+.. image:: https://travis-ci.org/aepsil0n/jelly.png?branch=master
+    :target: https://travis-ci.org/aepsil0n/jelly
+
+
 Examples
 --------
 
