@@ -35,6 +35,18 @@ class Vector(object):
         result = self.__eq__(other)
         return not result
 
+    def __lt__(self, other):
+        raise NotImplementedError("Vectors have no order")
+
+    def __le__(self, other):
+        raise NotImplementedError("Vectors have no order")
+
+    def __gt__(self, other):
+        raise NotImplementedError("Vectors have no order")
+
+    def __ge__(self, other):
+        raise NotImplementedError("Vectors have no order")
+
     def __hash__(self):
         return hash(self.__values)
 

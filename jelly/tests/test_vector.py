@@ -37,6 +37,29 @@ def test_not_equal():
     assert_false(Vector(1.0, 2.0) != Vector(1.0, 2.0))
     assert_true(Vector(1.0, 2.0) != Vector(0.0, 0.0))
 
+@raises(NotImplementedError)
+def test_greater():
+    """Vector > operator"""""
+    Vector(1.0) > Vector(2.0)
+
+
+@raises(NotImplementedError)
+def test_greater_equal():
+    """Vector >= operator"""""
+    Vector(1.0) >= Vector(2.0)
+
+
+@raises(NotImplementedError)
+def test_less():
+    """Vector < operator"""""
+    Vector(1.0) < Vector(2.0)
+
+
+@raises(NotImplementedError)
+def test_less_equal():
+    """Vector <= operator"""""
+    Vector(1.0) <= Vector(2.0)
+
 
 def test_equal_same_reference():
     """Equality for the same vector"""
