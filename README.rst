@@ -26,4 +26,17 @@ Python scripts. Note that you need to have ``jelly`` in your Python path to run
 them.
 
 
+Tests
+-----
+
+We use ``nosetests`` for unit testing.
+
+To run the tests install the nose_ package and call ``nosetests`` from the base
+directory.
+
+You can also install and use tox_ to run the tests for different python versions.
+
+
 .. _Arepo: http://www.mpa-garching.mpg.de/~volker/arepo/
+.. _nose: https://nose.readthedocs.org/
+.. _tox: https://tox.readthedocs.org/
