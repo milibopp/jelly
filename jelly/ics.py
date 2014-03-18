@@ -129,6 +129,9 @@ def iterate_ids(cells):
     Normal gas cells start at 1, solid cells at 30000000, gas cells comoving
     with solids at 40000000.
 
+    As a side effect this function assigns the IDs to the cells it iterates
+    over.
+
     NOTE: never use zero as a cell ID, it causes the derefinement subroutines
     to crash, since they internally set the ID of removed cells to zero
 
@@ -137,10 +140,12 @@ def iterate_ids(cells):
         'normal': 1,
         'solid': 30000000,
         'solid_adjacent': 40000000}
-    for category in map_quantity(cells, 'category'):
+    for cell in cells:
+        category = cell.category
         if category == 'nbody':
             category = 'normal' # Evil hack, fix this!
         yield counter[category]
+        cell.ident = counter[category]
         counter[category] += 1
 
 
