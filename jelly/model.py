@@ -27,12 +27,13 @@ class Cell(object):
     """
 
     def __init__(self, position, velocity, density, internal_energy,
-                 category='normal'):
+                 category='normal', ident=None):
         self.position = position
         self.velocity = velocity
         self.density = density
         self.internal_energy = internal_energy
         self.category = category
+        self.ident = ident
 
 
 class Gas(object):

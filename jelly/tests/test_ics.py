@@ -92,8 +92,11 @@ def test_body_block_scalar():
 
 def test_iterate_ids_simple():
     """Generate IDs for plain mesh"""
-    id_iter = iterate_ids(make_random_mesh().cells)
+    cells = list(make_random_mesh().cells)
+    id_iter = iterate_ids(cells)
     assert_equal(list(id_iter), list(range(1, 11)))
+    for i in range(0, 10):
+        assert_equal(cells[i].ident, i + 1)
 
 
 def _mesh_with_obstacle():
