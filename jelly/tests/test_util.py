@@ -1,9 +1,10 @@
 """Tests of utilities"""
 
 from nose.tools import (
-    assert_equal, assert_true, assert_false, raises, assert_in)
+    assert_equal, assert_true, assert_false, raises, assert_in,
+    assert_almost_in)
 from unittest import TestCase
-from math import pi, cos, sin
+from math import pi, cos, sin, sqrt
 
 from jelly.vector import Vector, dot
 from jelly.model import InconsistentGridError
@@ -82,6 +83,25 @@ def test_polar_grid_2d_azimuths():
     phi_step = 2 * pi / 31
     for phi in [k * phi_step for k in (0, 1, 2, 30)]:
         assert_in(Vector(0.5 * cos(phi), 0.5 * sin(phi), 0.0), grid)
+
+
+class TestLogarithmicPolarGrid2D(object):
+
+    def setup(self):
+        self.grid = LogarithmicPolarGrid2D(
+            Vector(5, 4, 0), (0.1, 10), 5, 10)
+
+    def test_radial(self):
+        for r in [0.1, sqrt(0.1), 1, sqrt(10), 10]:
+            assert_almost_in(self.grid.center + Vector(r, 0, 0), self.grid)
+            assert_almost_in(self.grid.center - Vector(r, 0, 0), self.grid)
+
+    def test_azimuthal(self):
+        for g in self.grid:
+            print(g)
+        for k in range(10):
+            phi = k / 5 * pi
+            assert_almost_in(self.grid.center + Vector(cos(phi), sin(phi), 0), self.grid)
 
 
 class TestCircularObstacle(TestCase):

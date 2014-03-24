@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Concrete implementations of the abstraction model.
 
@@ -117,6 +118,31 @@ class PolarGrid2D(object):
             phi_step = 2 * pi / n_phi
             for phi in [phi_step * n for n in range(n_phi)]:
                 yield self.center + Vector(r*cos(phi), r*sin(phi), 0.0)
+
+
+class LogarithmicPolarGrid2D(object):
+    """
+    A 2D grid with a logarithmic resolution in radial direction
+
+    The radial dimension is resolved within *boundaries*. There are *n_radius*
+    radial steps. The azimuthal dimension is resolved by *n_phi* cells for each
+    radius and spans from 0 to 2π.
+
+    """
+
+    def __init__(self, center, boundaries, n_radius, n_phi):
+        self.center = center
+        self.boundaries = boundaries
+        self.n_radius = n_radius
+        self.n_phi = n_phi
+
+    def __iter__(self):
+        a, b = self.boundaries
+        for n in range(self.n_radius):
+            r = a * (b / a) ** (n / (self.n_radius - 1))
+            for k in range(self.n_phi):
+                phi = 2 * k * pi / self.n_phi
+                yield self.center + Vector(r * cos(phi), r * sin(phi), 0.0)
 
 
 class CircularObstacle(Obstacle):
