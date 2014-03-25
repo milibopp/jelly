@@ -94,8 +94,12 @@ def make_header(n_part, mass_arr, time, redshift, flag_sfr, flag_feedback,
     """
 
     n_all_binary = [struct.pack('L', i) for i in n_all]
-    n_all_binary_higher = ''.join((i[4:] for i in n_all_binary))
-    n_all_binary_lower = ''.join((i[:4] for i in n_all_binary))
+
+    n_all_binary_higher = bytearray()
+    n_all_binary_lower = bytearray()
+    for i in n_all_binary:
+        n_all_binary_higher += bytearray(i[4:])
+        n_all_binary_lower += bytearray(i[:4])
 
     inner = bytearray()
     inner += struct.pack('i' * 6, *n_part)
