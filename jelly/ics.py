@@ -12,7 +12,7 @@ The header is a 256 bytes long zero-padded section at the beginning of the
 file.
 
 The following are the relevant quantities to be set. Integers are 4 bytes,
-floats are 8 bytes.
+floats are 8 bytes, flags are given as integers.
 
 - npart -- number of particles of each type
     - set to [N, 0 ...]
@@ -26,6 +26,16 @@ floats are 8 bytes.
 - flag_cooling = 0L
 - num_files = 1L
 - BoxSize -- size of boundary box for periodic boundary conditions
+- Omega0 = 1.0D
+- OmegaLambda = 0.0D
+- HubbleParam = 70.0D
+- flag_stellarage -- flags whether the file contains formation times of star particles
+- flag_metals -- flags whether the file contains metallicity values for gas and star particles
+- npartTotalHighWord -- High word of the total number of particles of each type
+- flag_entropy_instead_u -- flags that IC-file contains entropy instead of u
+
+Other fields not supported at the moment.
+
 
 ### Body
 
@@ -74,30 +84,40 @@ def make_f77_block(raw_block, pad=None):
 
 
 def make_header(n_part, mass_arr, time, redshift, flag_sfr, flag_feedback,
-                n_all, flag_cooling, num_files, box_size):
+                n_all, flag_cooling, num_files, box_size, omega0, omega_lambda,
+                hubble_parameter, flag_stellarage, flag_metals, flag_entropy_instead_u):
     """
     Make a header block. This is a very thin wrapper around the Gadget-2 header
     format. The parameters correspond directly to the parameters in the
-    specification found in the Gadget-2 manual.
+    specification found in the arepo all_vars header.
 
     """
+
+
     inner = bytearray()
     inner += struct.pack('i' * 6, *n_part)
     inner += struct.pack('d' * 6, *mass_arr)
     inner += struct.pack('ddii', time, redshift, flag_sfr, flag_feedback)
     inner += struct.pack('I' * 6, *n_all)
     inner += struct.pack('iid', flag_cooling, num_files, box_size)
+    inner += struct.pack('ddd', omega0, omega_lambda, hubble_parameter)
+    inner += struct.pack('ii', flag_stellarage, flag_stellarage)
+    inner += struct.pack('I' * 6, *([0,] * 6))
+    inner += struct.pack('i', flag_entropy_instead_u)
     return make_f77_block(inner, 256)
 
 
-def make_default_header(n_types, box_size=1.0, time=0.0, redshift=0.0,
-                        flag_sfr=0, flag_feedback=0, flag_cooling=0):
+def make_default_header(n_types, time=0.0, redshift=0.0,
+                        flag_sfr=0, flag_feedback=0, flag_cooling=0,
+                        box_size=1.0, omega0 = 1.0, omega_lambda = 0.0, hubble_parameter = 70.0,
+                        flag_stellarage = 0, flag_metals = 0, flag_entropy_instead_u = 0):
     """Make a header with some reasonable default assumptions."""
     mass_arr = (0.0,) * 6
     num_files = 1
     return make_header(n_types, mass_arr, time, redshift, flag_sfr,
                        flag_feedback, n_types, flag_cooling, num_files,
-                       box_size)
+                       box_size, omega0, omega_lambda,
+                       hubble_parameter, flag_stellarage, flag_metals, flag_entropy_instead_u)
 
 
 def make_body(fmt, data):

@@ -52,7 +52,13 @@ def test_make_header():
         n_all=(100, 0, 0, 0, 0, 0),
         flag_cooling=0,
         num_files=1,
-        box_size=1.0
+        box_size=1.0,
+        omega0=1.0,
+        omega_lambda=0.0,
+        hubble_parameter=70.0,
+        flag_stellarage=0,
+        flag_metals=0,
+        flag_entropy_instead_u=0
     )
     assert_equal(header[4:8], six.b('\x64') + six.b('\x00') * 3)
     assert_equal(header[8:28], six.b('\x00') * 20)
@@ -154,10 +160,10 @@ def _hash_write(mesh):
 
 
 def test_write_ics_md5():
-    """Write initial conditions"""
+    """Write initial conditions (md5 test)"""
     mesh = _mesh_with_obstacle()
     output_hash = _hash_write(mesh)
-    assert_equal(output_hash, 'd023c9d33f5aea2a99a61f9b4b8e3581')
+    assert_equal(output_hash, '84de7959d0366743d8b4b8a9cc08268c')
 
 
 def test_iterate_ids_with_nbody():
@@ -169,7 +175,7 @@ def test_iterate_ids_with_nbody():
 
 
 def test_write_ics_with_nbody_md5():
-    """Write initial conditions with N-body particle"""
+    """Write initial conditions with N-body particle (md5 test)"""
     mesh = make_mesh_with_nbody_cell(10)
     output_hash = _hash_write(mesh)
-    assert_equal(output_hash, 'a96c0d16ef7aa91a48b4811f36dba2d7')
+    assert_equal(output_hash, '6a819eb2f3e89eaf482a937e1d41f486')
