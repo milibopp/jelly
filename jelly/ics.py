@@ -93,16 +93,19 @@ def make_header(n_part, mass_arr, time, redshift, flag_sfr, flag_feedback,
 
     """
 
+    n_all_binary = [struct.pack('L', i) for i in n_all]
+    n_all_binary_higher = ''.join((i[4:] for i in n_all_binary))
+    n_all_binary_lower = ''.join((i[:4] for i in n_all_binary))
 
     inner = bytearray()
     inner += struct.pack('i' * 6, *n_part)
     inner += struct.pack('d' * 6, *mass_arr)
     inner += struct.pack('ddii', time, redshift, flag_sfr, flag_feedback)
-    inner += struct.pack('I' * 6, *n_all)
+    inner += n_all_binary_lower
     inner += struct.pack('iid', flag_cooling, num_files, box_size)
     inner += struct.pack('ddd', omega0, omega_lambda, hubble_parameter)
-    inner += struct.pack('ii', flag_stellarage, flag_stellarage)
-    inner += struct.pack('I' * 6, *([0,] * 6))
+    inner += struct.pack('ii', flag_stellarage, flag_metals)
+    inner += n_all_binary_higher
     inner += struct.pack('i', flag_entropy_instead_u)
     return make_f77_block(inner, 256)
 

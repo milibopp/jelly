@@ -64,6 +64,35 @@ def test_make_header():
     assert_equal(header[8:28], six.b('\x00') * 20)
     assert_equal(header[100:104], six.b('\x64') + six.b('\x00') * 3)
     assert_equal(header[128:132], six.b('\x01') + six.b('\x00') * 3)
+    assert_equal(header[172:176], six.b('\x00') * 4) # n_all_high
+    assert_equal(len(header), 264)
+
+
+def test_make_header_large_n_all():
+    """Make a header block with more than 2**32 n_all"""
+    header = make_header(
+        n_part=(100, 0, 0, 0, 0, 0),
+        mass_arr=(0.0,) * 6,
+        time=0.0,
+        redshift=0.0,
+        flag_sfr=0,
+        flag_feedback=0,
+        n_all=(100+2**32, 0, 0, 0, 0, 0),
+        flag_cooling=0,
+        num_files=1,
+        box_size=1.0,
+        omega0=1.0,
+        omega_lambda=0.0,
+        hubble_parameter=70.0,
+        flag_stellarage=0,
+        flag_metals=0,
+        flag_entropy_instead_u=0
+    )
+    assert_equal(header[4:8], six.b('\x64') + six.b('\x00') * 3)
+    assert_equal(header[8:28], six.b('\x00') * 20)
+    assert_equal(header[100:104], six.b('\x64') + six.b('\x00') * 3)
+    assert_equal(header[128:132], six.b('\x01') + six.b('\x00') * 3)
+    assert_equal(header[172:176], six.b('\x01') + six.b('\x00') * 3)  # n_all_high
     assert_equal(len(header), 264)
 
 
