@@ -82,10 +82,10 @@ def make_header(n_part, mass_arr, time, redshift, flag_sfr, flag_feedback,
 
     """
     inner = bytearray()
-    inner += struct.pack('I' * 6, *n_part)
+    inner += struct.pack('i' * 6, *n_part)
     inner += struct.pack('d' * 6, *mass_arr)
     inner += struct.pack('ddii', time, redshift, flag_sfr, flag_feedback)
-    inner += struct.pack('i' * 6, *n_all)
+    inner += struct.pack('I' * 6, *n_all)
     inner += struct.pack('iid', flag_cooling, num_files, box_size)
     return make_f77_block(inner, 256)
 
