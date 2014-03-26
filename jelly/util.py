@@ -28,6 +28,8 @@ class MonteCarloGrid2D(object):
     Its grid points are sampled uniformly within a box. The number of grid
     points can be specified.
 
+    TODO: needs testing
+
     """
 
     def __init__(self, box, number):
@@ -46,6 +48,8 @@ class MonteCarloGrid3D(object):
 
     Its grid points are sampled uniformly within a box. The number of grid
     points can be specified.
+
+    TODO: needs testing
 
     """
 
