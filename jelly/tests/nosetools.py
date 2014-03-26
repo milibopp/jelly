@@ -17,4 +17,4 @@ def assert_not_in(item, collection):
     assert item not in collection, "{:r} in {:r}".format(item, collection)
 
 if not hasattr(nt, 'assert_not_in'):
-    nt.assert_in = assert_in
+    nt.assert_not_in = assert_not_in
