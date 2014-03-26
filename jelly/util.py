@@ -13,12 +13,30 @@ from random import uniform
 from .model import CellCollection, Cell, Obstacle, InconsistentGridError, UniformGas
 from .vector import Vector
 
-'''
-An axis-parallel box, with the 'bottom-right' corner at *position* and spans *size*.
 
-*Position* and *size* must have the same dimensions.
-'''
-Box = namedtuple('Box', ['position', 'size'])
+class InvalidBoxError(Exception):
+    """Raised when an invalid box is created"""
+    pass
+
+
+class Box(object):
+    """
+    An axis-parallel box
+
+    The bottom-left corner is at *position* and spans *size*. *position* and
+    *size* must have the same dimensions.
+
+    """
+
+    def __init__(self, position, size):
+        if len(size) != len(position):
+            raise InvalidBoxError("box position and size must have same dimension")
+        for x in size:
+            if x < 0:
+                raise InvalidBoxError("box size must have positive values")
+        self.position = position
+        self.size = size
+
 
 class MonteCarloGrid2D(object):
     """
