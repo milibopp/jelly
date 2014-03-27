@@ -2,7 +2,8 @@
 
 from unittest import TestCase
 
-from nose.tools import (assert_less_equal, assert_greater_equal, assert_in, assert_equal, assert_false, assert_true)
+from nose.tools import (assert_less_equal, assert_greater_equal, assert_in,
+    assert_equal, assert_false, assert_true, raises)
 
 from jelly.util import *
 
