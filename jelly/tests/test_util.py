@@ -6,9 +6,58 @@ from nose.tools import (
 from unittest import TestCase
 from math import pi, cos, sin, sqrt
 
-from jelly.vector import Vector, dot
-from jelly.model import InconsistentGridError
+from nose.tools import (assert_less_equal, assert_greater_equal, assert_in, assert_equal, assert_false, assert_true)
+
 from jelly.util import *
+
+
+def test_monte_carlo_grid_3d_size():
+    """Check number of vectors in Monte Carlo 3D grid"""
+    n = 1000
+    grid = MonteCarloGrid3D(Box(Vector(2.0, -1.0, 1.0), Vector(5.0, 6.0, 3.0)), n)
+    vectors = [v for v in grid]
+
+    assert_equal(len(vectors), n)
+
+
+def test_monte_carlo_grid_3d_range():
+    """Check range of vectors in Monte Carlo 3D grid"""
+    n = 10000
+    box = Box(Vector(2.0, -1.0, 1.0), Vector(5.0, 6.0, 3.0))
+    grid = MonteCarloGrid3D(box, n)
+    vectors = [v for v in grid]
+
+    for x, y, z in vectors:
+        assert_greater_equal(x, box.position[0])
+        assert_greater_equal(y, box.position[1])
+        assert_greater_equal(z, box.position[2])
+        assert_less_equal(x, box.position[0] + box.size[0])
+        assert_less_equal(y, box.position[1] + box.size[1])
+        assert_less_equal(z, box.position[2] + box.size[2])
+
+
+def test_monte_carlo_grid_2d_size():
+    """Check number of vectors in Monte Carlo 2D grid"""
+    n = 1000
+    grid = MonteCarloGrid2D(Box(Vector(2.0, -1.0), Vector(5.0, 6.0)), n)
+    vectors = [v for v in grid]
+
+    assert_equal(len(vectors), n)
+
+
+def test_monte_carlo_grid_2d_range():
+    """Check range of vectors in Monte Carlo 2D grid"""
+    n = 10000
+    box = Box(Vector(2.0, -1.0), Vector(5.0, 6.0))
+    grid = MonteCarloGrid2D(box, n)
+    vectors = [v for v in grid]
+
+    for x, y, z in vectors:
+        assert_greater_equal(x, box.position[0])
+        assert_greater_equal(y, box.position[1])
+        assert_greater_equal(z, 0.0)
+        assert_less_equal(x, box.position[0] + box.size[0])
+        assert_less_equal(y, box.position[1] + box.size[1])
 
 
 def test_cartesian_grid_2d_iterate():
