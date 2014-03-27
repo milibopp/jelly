@@ -18,3 +18,25 @@ def assert_not_in(item, collection):
 
 if not hasattr(nt, 'assert_not_in'):
     nt.assert_not_in = assert_not_in
+
+
+def assert_less_equal(first, second, msg=None):
+    if not first <= second:
+        if msg is None:
+            raise AssertionError('"' + repr(first) + '" unexpectedly not less than or equal to "' + repr(second) + '"')
+        else:
+            raise AssertionError(msg)
+
+if not hasattr(nt, 'assert_less_equal'):
+    nt.assert_less_equal = assert_less_equal
+
+
+def assert_greater_equal(first, second, msg=None):
+    if not first >= second:
+        if msg is None:
+            raise AssertionError('"' + repr(first) + '" unexpectedly not greater than or equal to "' + repr(second) + '"')
+        else:
+            raise AssertionError(msg)
+
+if not hasattr(nt, 'assert_greater_equal'):
+    nt.assert_greater_equal = assert_greater_equal

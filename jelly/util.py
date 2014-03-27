@@ -20,12 +20,15 @@ An axis-parallel box, with the 'bottom-right' corner at *position* and spans *si
 '''
 Box = namedtuple('Box', ['position', 'size'])
 
+
 class MonteCarloGrid2D(object):
     """
-    A completely random grid
+    A completely random 2d grid.
 
     Its grid points are sampled uniformly within a box. The number of grid
     points can be specified.
+
+    TODO: needs testing
 
     """
 
@@ -35,9 +38,29 @@ class MonteCarloGrid2D(object):
 
     def __iter__(self):
         for _ in range(self.number):
-            x, y = (uniform(x, dx)
-                for x, dx in zip(self.box.position, self.box.size))
+            x, y = (uniform(p, dp) for p, dp in zip(self.box.position, self.box.position + self.box.size))
             yield Vector(x, y, 0.0)
+
+
+class MonteCarloGrid3D(object):
+    """
+    A completely random 3d grid.
+
+    Its grid points are sampled uniformly within a box. The number of grid
+    points can be specified.
+
+    TODO: needs testing
+
+    """
+
+    def __init__(self, box, number):
+        self.box = box
+        self.number = number
+
+    def __iter__(self):
+        for _ in range(self.number):
+            x, y, z = (uniform(p, dp) for p, dp in zip(self.box.position, self.box.position + self.box.size))
+            yield Vector(x, y, z)
 
 
 class CartesianGrid2D(object):
