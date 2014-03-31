@@ -9,22 +9,6 @@ from jelly.vector import Vector
 from jelly.model import *
 
 
-class CustomObstacle(Obstacle):
-    """A custom obstacle that cuts off any cells with x < 1.5"""
-
-    def gas_cells(self):
-        return iter([])
-
-    def solid_cells(self):
-        return iter([])
-
-    def inside(self, position):
-        return position[0] < 1.5
-
-    def check(self):
-        return True
-
-
 class TestCell(TestCase):
 
     def test_init(self):
