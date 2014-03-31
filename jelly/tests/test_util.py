@@ -2,9 +2,30 @@
 
 from unittest import TestCase
 
-from nose.tools import (assert_less_equal, assert_greater_equal, assert_in, assert_equal, assert_false, assert_true)
+from nose.tools import (assert_less_equal, assert_greater_equal, assert_in,
+    assert_equal, assert_false, assert_true, raises)
 
 from jelly.util import *
+
+
+class TestBox(object):
+    """Tests of Box class"""
+
+    def test_simple(self):
+        """A simple working box"""
+        box = Box(Vector(0, 0), Vector(1, 1))
+        assert_equal(box.position, Vector(0, 0))
+        assert_equal(box.size, Vector(1, 1))
+
+    @raises(InvalidBoxError)
+    def test_negative_size(self):
+        """Exception is raised for negative sizes"""
+        box = Box(Vector(1, 2), Vector(-1, 1))
+
+    @raises(InvalidBoxError)
+    def test_faulty_dimensions(self):
+        """Exception is raised for incompatible dimensions"""
+        box = Box(Vector(1, 2, 3), Vector(1, 1))
 
 
 def test_monte_carlo_grid_3d_size():
