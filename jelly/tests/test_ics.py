@@ -121,6 +121,23 @@ def test_iterate_ids_obstacle():
     assert_equal(len(list(filter(lambda id_: id_ < 30000000, ids))), 88)
 
 
+class TestGetType(object):
+
+    def test_zeros(self):
+        for category in ['normal', 'solid', 'solid_adjacent']:
+            cell = Cell(None, None, None, None, category)
+            assert_equal(get_type_of_cell(cell), 0)
+
+    def test_nbody(self):
+        cell = Cell(None, None, None, None, 'nbody')
+        assert_equal(get_type_of_cell(cell), 4)
+
+    @raises(ValueError)
+    def test_invalid(self):
+        cell = Cell(None, None, None, None, 'invalid_category')
+        _ = get_type_of_cell(cell)
+
+
 def test_count_types():
     """Count the cell types in a mesh"""
     mesh = make_mesh_with_nbody_cell(10)
