@@ -63,6 +63,7 @@ def test_make_header():
     )
 
     header = make_header(**data)
+
     assert_equal(header[4:28],    struct.pack('iiiiii', *data["n_part"]))
     assert_equal(header[28:76],   struct.pack('dddddd', *data["mass_arr"]))
     assert_equal(header[76:84],   struct.pack('d', data["time"]))
@@ -87,29 +88,31 @@ def test_make_header():
 
 def test_make_header_large_n_all():
     """Make a header block with more than 2**32 n_all"""
-    header = make_header(
-        n_part=(100, 0, 0, 0, 0, 0),
+
+    data = dict(
+        n_part=(100, 200, 300, 400, 500, 600),
         mass_arr=(0.0,) * 6,
-        time=0.0,
-        redshift=0.0,
-        flag_sfr=0,
-        flag_feedback=0,
-        n_all=(100+2**32, 0, 0, 0, 0, 0),
-        flag_cooling=0,
+        time=1000.5,
+        redshift=50.1,
+        flag_sfr=1,
+        flag_feedback=1,
+        n_all=(2**32 + 100, 2**33 + 200, 2**34 + 300, 2**35 + 400, 2**36 + 500, 2**37 + 600),
+        flag_cooling=1,
         num_files=1,
         box_size=1.0,
-        omega0=1.0,
-        omega_lambda=0.0,
+        omega0=123.0,
+        omega_lambda=412.1231,
         hubble_parameter=70.0,
-        flag_stellarage=0,
-        flag_metals=0,
-        flag_entropy_instead_u=0
+        flag_stellarage=1,
+        flag_metals=1,
+        flag_entropy_instead_u=1
     )
-    assert_equal(header[4:8], six.b('\x64') + six.b('\x00') * 3)
-    assert_equal(header[8:28], six.b('\x00') * 20)
-    assert_equal(header[100:104], six.b('\x64') + six.b('\x00') * 3)
-    assert_equal(header[128:132], six.b('\x01') + six.b('\x00') * 3)
-    assert_equal(header[172:176], six.b('\x01') + six.b('\x00') * 3)  # n_all_high
+
+    header = make_header(**data)
+
+    assert_equal(header[100:124], struct.pack('iiiiii', 100, 200, 300, 400, 500, 600))
+    assert_equal(header[172:196], struct.pack('iiiiii', 2**0, 2**1, 2**2, 2**3, 2**4, 2**5))
+
     assert_equal(len(header), 264)
 
 
