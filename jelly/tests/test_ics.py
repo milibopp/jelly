@@ -42,30 +42,47 @@ def test_make_f77_block_padding_too_small():
 
 def test_make_header():
     """Make a header block"""
-    header = make_header(
-        n_part=(100, 0, 0, 0, 0, 0),
+
+    data = dict(
+        n_part=(100, 200, 300, 400, 500, 600),
         mass_arr=(0.0,) * 6,
-        time=0.0,
-        redshift=0.0,
-        flag_sfr=0,
-        flag_feedback=0,
-        n_all=(100, 0, 0, 0, 0, 0),
-        flag_cooling=0,
+        time=1000.5,
+        redshift=50.1,
+        flag_sfr=1,
+        flag_feedback=1,
+        n_all=(100, 200, 300, 400, 500, 600),
+        flag_cooling=1,
         num_files=1,
         box_size=1.0,
-        omega0=1.0,
-        omega_lambda=0.0,
+        omega0=123.0,
+        omega_lambda=412.1231,
         hubble_parameter=70.0,
-        flag_stellarage=0,
-        flag_metals=0,
-        flag_entropy_instead_u=0
+        flag_stellarage=1,
+        flag_metals=1,
+        flag_entropy_instead_u=1
     )
-    assert_equal(header[4:8], six.b('\x64') + six.b('\x00') * 3)
-    assert_equal(header[8:28], six.b('\x00') * 20)
-    assert_equal(header[100:104], six.b('\x64') + six.b('\x00') * 3)
-    assert_equal(header[128:132], six.b('\x01') + six.b('\x00') * 3)
-    assert_equal(header[172:176], six.b('\x00') * 4) # n_all_high
-    assert_equal(len(header), 264)
+
+    header = make_header(**data)
+    assert_equal(header[4:28],    struct.pack('iiiiii', *data["n_part"]))
+    assert_equal(header[28:76],   struct.pack('dddddd', *data["mass_arr"]))
+    assert_equal(header[76:84],   struct.pack('d', data["time"]))
+    assert_equal(header[84:92],   struct.pack('d', data["redshift"]))
+    assert_equal(header[92:96],   struct.pack('i', data["flag_sfr"]))
+    assert_equal(header[96:100],  struct.pack('i', data["flag_feedback"]))
+    assert_equal(header[100:124], struct.pack('iiiiii', *data["n_all"]))
+    assert_equal(header[124:128], struct.pack('i', data["flag_cooling"]))
+    assert_equal(header[128:132], struct.pack('i', data["num_files"]))
+    assert_equal(header[132:140], struct.pack('d', data["box_size"]))
+    assert_equal(header[140:148], struct.pack('d', data["omega0"]))
+    assert_equal(header[148:156], struct.pack('d', data["omega_lambda"]))
+    assert_equal(header[156:164], struct.pack('d', data["hubble_parameter"]))
+    assert_equal(header[164:168], struct.pack('i', data["flag_stellarage"]))
+    assert_equal(header[168:172], struct.pack('i', data["flag_metals"]))
+    assert_equal(header[172:196], struct.pack('iiiiii', *(0, 0, 0, 0, 0, 0)))
+    assert_equal(header[196:200], struct.pack('i', data["flag_entropy_instead_u"]))
+    assert_equal(header[200:260], six.b('\x00') * 60)
+
+    assert_equal(len(header), 256 + 2 * 4)  # data + length fields
 
 
 def test_make_header_large_n_all():
