@@ -42,22 +42,77 @@ def test_make_f77_block_padding_too_small():
 
 def test_make_header():
     """Make a header block"""
-    header = make_header(
-        n_part=(100, 0, 0, 0, 0, 0),
+
+    data = dict(
+        n_part=(100, 200, 300, 400, 500, 600),
         mass_arr=(0.0,) * 6,
-        time=0.0,
-        redshift=0.0,
-        flag_sfr=0,
-        flag_feedback=0,
-        n_all=(100, 0, 0, 0, 0, 0),
-        flag_cooling=0,
+        time=1000.5,
+        redshift=50.1,
+        flag_sfr=1,
+        flag_feedback=1,
+        n_all=(100, 200, 300, 400, 500, 600),
+        flag_cooling=1,
         num_files=1,
-        box_size=1.0
+        box_size=1.0,
+        omega0=123.0,
+        omega_lambda=412.1231,
+        hubble_parameter=70.0,
+        flag_stellarage=1,
+        flag_metals=1,
+        flag_entropy_instead_u=1
     )
-    assert_equal(header[4:8], six.b('\x64') + six.b('\x00') * 3)
-    assert_equal(header[8:28], six.b('\x00') * 20)
-    assert_equal(header[100:104], six.b('\x64') + six.b('\x00') * 3)
-    assert_equal(header[128:132], six.b('\x01') + six.b('\x00') * 3)
+
+    header = make_header(**data)
+
+    assert_equal(header[4:28],    struct.pack('iiiiii', *data["n_part"]))
+    assert_equal(header[28:76],   struct.pack('dddddd', *data["mass_arr"]))
+    assert_equal(header[76:84],   struct.pack('d', data["time"]))
+    assert_equal(header[84:92],   struct.pack('d', data["redshift"]))
+    assert_equal(header[92:96],   struct.pack('i', data["flag_sfr"]))
+    assert_equal(header[96:100],  struct.pack('i', data["flag_feedback"]))
+    assert_equal(header[100:124], struct.pack('iiiiii', *data["n_all"]))
+    assert_equal(header[124:128], struct.pack('i', data["flag_cooling"]))
+    assert_equal(header[128:132], struct.pack('i', data["num_files"]))
+    assert_equal(header[132:140], struct.pack('d', data["box_size"]))
+    assert_equal(header[140:148], struct.pack('d', data["omega0"]))
+    assert_equal(header[148:156], struct.pack('d', data["omega_lambda"]))
+    assert_equal(header[156:164], struct.pack('d', data["hubble_parameter"]))
+    assert_equal(header[164:168], struct.pack('i', data["flag_stellarage"]))
+    assert_equal(header[168:172], struct.pack('i', data["flag_metals"]))
+    assert_equal(header[172:196], struct.pack('iiiiii', *(0, 0, 0, 0, 0, 0)))
+    assert_equal(header[196:200], struct.pack('i', data["flag_entropy_instead_u"]))
+    assert_equal(header[200:260], six.b('\x00') * 60)
+
+    assert_equal(len(header), 256 + 2 * 4)  # data + length fields
+
+
+def test_make_header_large_n_all():
+    """Make a header block with more than 2**32 n_all"""
+
+    data = dict(
+        n_part=(100, 200, 300, 400, 500, 600),
+        mass_arr=(0.0,) * 6,
+        time=1000.5,
+        redshift=50.1,
+        flag_sfr=1,
+        flag_feedback=1,
+        n_all=(2**32 + 100, 2**33 + 200, 2**34 + 300, 2**35 + 400, 2**36 + 500, 2**37 + 600),
+        flag_cooling=1,
+        num_files=1,
+        box_size=1.0,
+        omega0=123.0,
+        omega_lambda=412.1231,
+        hubble_parameter=70.0,
+        flag_stellarage=1,
+        flag_metals=1,
+        flag_entropy_instead_u=1
+    )
+
+    header = make_header(**data)
+
+    assert_equal(header[100:124], struct.pack('iiiiii', 100, 200, 300, 400, 500, 600))
+    assert_equal(header[172:196], struct.pack('iiiiii', 2**0, 2**1, 2**2, 2**3, 2**4, 2**5))
+
     assert_equal(len(header), 264)
 
 
@@ -171,10 +226,10 @@ def _hash_write(mesh):
 
 
 def test_write_ics_md5():
-    """Write initial conditions"""
+    """Write initial conditions (md5 test)"""
     mesh = _mesh_with_obstacle()
     output_hash = _hash_write(mesh)
-    assert_equal(output_hash, 'd023c9d33f5aea2a99a61f9b4b8e3581')
+    assert_equal(output_hash, '84de7959d0366743d8b4b8a9cc08268c')
 
 
 def test_iterate_ids_with_nbody():
@@ -186,7 +241,7 @@ def test_iterate_ids_with_nbody():
 
 
 def test_write_ics_with_nbody_md5():
-    """Write initial conditions with N-body particle"""
+    """Write initial conditions with N-body particle (md5 test)"""
     mesh = make_mesh_with_nbody_cell(10)
     output_hash = _hash_write(mesh)
-    assert_equal(output_hash, 'a96c0d16ef7aa91a48b4811f36dba2d7')
+    assert_equal(output_hash, '6a819eb2f3e89eaf482a937e1d41f486')
