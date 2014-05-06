@@ -9,6 +9,13 @@ class RangeExhaustedError(Exception):
 
 
 class IDRange(object):
+    """Range of IDs for assignment
+
+    A simple range of IDs that can be consumed by objects to which IDs from the
+    range are assigned. Once exhausted, no further IDs can be assigned. Both
+    objects and IDs are guaranteed to be uniquely associated with each other.
+
+    """
 
     def __init__(self, start, end):
         self.start = start
@@ -38,8 +45,28 @@ class IDRange(object):
         for key, value in self._map.iteritems():
             if value is obj:
                 return key
-        raise ValueError('object not found')
 
     def get_object(self, object_id):
         """Get the object associated with a given ID"""
-        return self._map[object_id]
+        return self._map.get(object_id, None)
+
+
+class CompoundIDRange(object):
+
+    def __init__(self, dispatcher):
+        self.dispatcher = dispatcher
+
+    def assign_id(self, obj):
+        self.dispatcher.dispatch(obj).assign_id(obj)
+
+    def get_id(self, obj):
+        for comp in self.dispatcher.components:
+            the_id = comp.get_id(obj)
+            if the_id is not None:
+                return the_id
+
+    def get_object(self, object_id):
+        for comp in self.dispatcher.components:
+            obj = comp.get_object(object_id)
+            if obj is not None:
+                return obj
