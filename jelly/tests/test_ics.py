@@ -229,7 +229,7 @@ def test_write_ics_md5():
     """Write initial conditions (md5 test)"""
     mesh = _mesh_with_obstacle()
     output_hash = _hash_write(mesh)
-    assert_equal(output_hash, '84de7959d0366743d8b4b8a9cc08268c')
+    assert_equal(output_hash, '2e552a0818d99285d43f1d857c3a4eaa')
 
 
 def test_iterate_ids_with_nbody():
