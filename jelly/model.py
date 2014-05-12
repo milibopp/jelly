@@ -10,6 +10,7 @@ cell's coordinates, solid objects used for special boundaries etc.
 
 from __future__ import division
 from abc import ABCMeta, abstractproperty, abstractmethod
+from itertools import chain
 
 from .vector import Vector
 
@@ -191,35 +192,20 @@ class Obstacle(object):
         pass
 
 
-class Mesh(object):
-    """
-    The mesh is the top-level object containing the information required to
-    describe an initial conditions file (or a snapshot).
+def make_mesh(gas, grid, obstacles=None, extras=None):
+    """Create a whole mesh
+
+    This is a convenience function that takes care of the entire mesh
+    generation process, such as discretising the gas distribution onto a grid.
+    It also generates obstacles and consider extra particles.
 
     """
-
-    def __init__(self, gas, grid, obstacles=None, extras=None, boxsize=1.0):
-        self.gas = gas
-        self.grid = grid
-        self.obstacles = obstacles or list()
-        self.extras = extras or list()
-        self.boxsize = boxsize
-
-    @property
-    def cells(self):
-        """
-        All cells of this mesh. This basically wraps up all gas (dynamically
-        excluding everything inside some obstacle) and the cells making up
-        obstacles.
-
-        """
-        for cell in approximate_gas(self.gas, self.grid, self.obstacles):
-            yield cell
-        for obstacle in self.obstacles:
-            for cell in obstacle.gas_cells(self.gas):
-                yield cell
-            for cell in obstacle.solid_cells():
-                yield cell
-        for extra in self.extras:
-            for cell in extra:
-                yield cell
+    return (
+        list(approximate_gas(gas, grid, obstacles))
+        + list(chain(*[
+            list(obstacle.gas_cells(gas))
+            + list(obstacle.solid_cells())
+            for obstacle in (obstacles or [])
+        ]))
+        + list(chain(*(extras or [])))
+    )
