@@ -3,6 +3,8 @@ ID assignment module
 
 """
 
+import six
+
 
 class RangeExhaustedError(Exception):
     pass
@@ -35,14 +37,14 @@ class IDRange(object):
         """
         if self._state > self.end:
             raise RangeExhaustedError('ID range is exhausted')
-        if obj in self._map.itervalues():
+        if obj in six.itervalues(self._map):
             raise ValueError('duplicate object')
         self._map[self._state] = obj
         self._state += 1
 
     def get_id(self, obj):
         """Get the ID of an object"""
-        for key, value in self._map.iteritems():
+        for key, value in six.iteritems(self._map):
             if value is obj:
                 return key
 
