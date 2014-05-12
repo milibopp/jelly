@@ -153,8 +153,8 @@ def iterate_ids(cells):
     """
     Iterates over the computed IDs of a given mesh
 
-    Normal gas cells start at 1, solid cells at 30000000, gas cells comoving
-    with solids at 40000000.
+    Normal gas cells start at 1, gas cells comoving with solid cells at
+    30000000, solid cells at 40000000.
 
     As a side effect this function assigns the IDs to the cells it iterates
     over.
@@ -165,8 +165,8 @@ def iterate_ids(cells):
     """
     counter = {
         'normal': 1,
-        'solid': 30000000,
-        'solid_adjacent': 40000000}
+        'solid': 40000000,
+        'solid_adjacent': 30000000}
     for cell in cells:
         category = cell.category
         if category == 'nbody':
