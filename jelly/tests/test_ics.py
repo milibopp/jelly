@@ -8,12 +8,53 @@ from nose.tools import assert_equal, raises
 from tempfile import NamedTemporaryFile
 from hashlib import md5
 import six
+from mock import Mock
 
 from jelly.ics import *
-from jelly.model import Cell, Mesh, UniformGas
+from jelly.model import Cell, UniformGas, make_mesh
 from jelly.util import CartesianGrid2D, CircularObstacle, Box
 from jelly.vector import Vector
 from .test_model import make_random_mesh, make_mesh_with_nbody_cell
+
+
+def mock_cell(category):
+    """Helper function to create a mock cell with given category"""
+    cell = Mock()
+    cell.category = category
+    return cell
+
+
+class TestDefaultIDRangeDispatcher(object):
+
+    def setup(self):
+        self.id_range = DefaultIDRangeDispatcher()
+
+    def test_dispatch_normal(self):
+        the_range = self.id_range.dispatch(mock_cell('normal'))
+        assert_equal(the_range.start, 1)
+
+    def test_dispatch_nbody(self):
+        the_range = self.id_range.dispatch(mock_cell('nbody'))
+        assert_equal(the_range.start, 1)
+
+    def test_dispatch_solid(self):
+        the_range = self.id_range.dispatch(mock_cell('solid'))
+        assert_equal(the_range.start, 40000000)
+
+    def test_dispatch_solid_adjacent(self):
+        the_range = self.id_range.dispatch(mock_cell('solid_adjacent'))
+        assert_equal(the_range.start, 30000000)
+
+    @raises(ValueError)
+    def test_dispatch_fails(self):
+        self.id_range.dispatch(mock_cell('invalid'))
+
+
+def test_assign_ids():
+    cells = [mock_cell('normal'), mock_cell('solid')]
+    id_range = assign_ids(cells)
+    assert_equal(id_range.get_id(cells[0]), 1)
+    assert_equal(id_range.get_id(cells[1]), 40000000)
 
 
 def test_make_f77_block():
@@ -151,8 +192,6 @@ def test_iterate_ids_simple():
     id_range = assign_ids(cells)
     id_iter = iterate_ids(cells, id_range)
     assert_equal(list(id_iter), list(range(1, 11)))
-    for i in range(0, 10):
-        assert_equal(cells[i].ident, i + 1)
 
 
 def _mesh_with_obstacle():
