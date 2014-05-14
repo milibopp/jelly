@@ -1,13 +1,11 @@
 """Tests of utilities"""
 
-from nose.tools import (
-    assert_equal, assert_true, assert_false, raises, assert_in,
-    assert_almost_in)
 from unittest import TestCase
 from math import pi, cos, sin, sqrt
 
 from nose.tools import (assert_less_equal, assert_greater_equal, assert_in,
-    assert_equal, assert_false, assert_true, raises)
+    assert_equal, assert_false, assert_true, raises, assert_almost_in,
+    assert_greater, assert_less)
 
 from jelly.util import *
 
@@ -174,14 +172,24 @@ class TestLogarithmicPolarGrid2D(object):
             assert_almost_in(self.grid.center + Vector(cos(phi), sin(phi), 0), self.grid)
 
 
-class TestCircularObstacle(TestCase):
+class TestCircularObstacle(object):
     """
     Test of CircularObstacle class
 
     """
 
+    def setup(self):
+        self.circle = CircularObstacle((0.0, 0.0), 1.0)
+
+    def test_fluids(self):
+        for pos in self.circle.fluids:
+            assert_greater(abs(pos), 1.0)
+
+    def test_solids(self):
+        for pos in self.circle.solids:
+            assert_less(abs(pos), 1.0)
+
     def test_inside(self):
         """Inside-circle checks"""
-        circle = CircularObstacle((0.0, 0.0), 1.0)
-        assert_false(circle.inside((2.0, 0.0)))
-        assert_true(circle.inside((0.0, 0.0)))
+        assert_false(self.circle.inside((2.0, 0.0)))
+        assert_true(self.circle.inside((0.0, 0.0)))

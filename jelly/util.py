@@ -11,7 +11,7 @@ from math import pi, sin, cos
 from collections import namedtuple
 from random import uniform
 
-from .model import CellCollection, Cell, Obstacle, InconsistentGridError, UniformGas
+from .model import CellCollection, Obstacle, InconsistentGridError
 from .vector import Vector
 
 
@@ -228,19 +228,17 @@ class CircularObstacle(Obstacle):
             r * cos(phi) + self.center[1],
             0.0)
 
-    def gas_cells(self, gas):
+    @property
+    def fluids(self):
         """Generator of gas cells surrounding obstacle"""
         for k in range(self.n_phi):
-            x = self.__circle_position(k, self.inverted)
-            yield gas.create_cell(x, 'solid_adjacent')
+            yield self.__circle_position(k, self.inverted)
 
-    def solid_cells(self):
+    @property
+    def solids(self):
         """Generator of solid obstacle cells"""
-        nongas = UniformGas()
         for k in range(self.n_phi):
-            yield nongas.create_cell(
-                self.__circle_position(k, not self.inverted),
-                category='solid')
+            yield self.__circle_position(k, not self.inverted)
 
     def inside(self, position):
         """
