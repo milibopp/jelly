@@ -8,12 +8,53 @@ from nose.tools import assert_equal, raises
 from tempfile import NamedTemporaryFile
 from hashlib import md5
 import six
+from mock import Mock
 
 from jelly.ics import *
-from jelly.model import Cell, Mesh, UniformGas
+from jelly.model import Cell, UniformGas, make_mesh
 from jelly.util import CartesianGrid2D, CircularObstacle, Box
 from jelly.vector import Vector
 from .test_model import make_random_mesh, make_mesh_with_nbody_cell
+
+
+def mock_cell(category):
+    """Helper function to create a mock cell with given category"""
+    cell = Mock()
+    cell.category = category
+    return cell
+
+
+class TestDefaultIDRangeDispatcher(object):
+
+    def setup(self):
+        self.id_range = DefaultIDRangeDispatcher()
+
+    def test_dispatch_normal(self):
+        the_range = self.id_range.dispatch(mock_cell('normal'))
+        assert_equal(the_range.start, 1)
+
+    def test_dispatch_nbody(self):
+        the_range = self.id_range.dispatch(mock_cell('nbody'))
+        assert_equal(the_range.start, 1)
+
+    def test_dispatch_solid(self):
+        the_range = self.id_range.dispatch(mock_cell('solid'))
+        assert_equal(the_range.start, 40000000)
+
+    def test_dispatch_solid_adjacent(self):
+        the_range = self.id_range.dispatch(mock_cell('solid_adjacent'))
+        assert_equal(the_range.start, 30000000)
+
+    @raises(ValueError)
+    def test_dispatch_fails(self):
+        self.id_range.dispatch(mock_cell('invalid'))
+
+
+def test_assign_ids():
+    cells = [mock_cell('normal'), mock_cell('solid')]
+    id_range = assign_ids(cells)
+    assert_equal(id_range.get_id(cells[0]), 1)
+    assert_equal(id_range.get_id(cells[1]), 40000000)
 
 
 def test_make_f77_block():
@@ -147,29 +188,29 @@ def test_body_block_scalar():
 
 def test_iterate_ids_simple():
     """Generate IDs for plain mesh"""
-    cells = list(make_random_mesh().cells)
-    id_iter = iterate_ids(cells)
+    cells = make_random_mesh()
+    id_range = assign_ids(cells)
+    id_iter = iterate_ids(cells, id_range)
     assert_equal(list(id_iter), list(range(1, 11)))
-    for i in range(0, 10):
-        assert_equal(cells[i].ident, i + 1)
 
 
 def _mesh_with_obstacle():
     """Generate a mesh with obstacles for testing"""
     grid = CartesianGrid2D(Box(Vector(0, 0), Vector(2, 2)), (10, 10))
     circle = CircularObstacle((1, 1), 0.2, n_phi=12)
-    return Mesh(UniformGas(), grid, [circle])
+    return make_mesh(UniformGas(), grid, [circle]), circle
 
 
 def test_iterate_ids_obstacle():
     """Generate IDs for mesh with obstacle"""
     # Fixture
-    mesh = _mesh_with_obstacle()
-    ids = list(iterate_ids(mesh.cells))
+    cells, obstacle = _mesh_with_obstacle()
+    id_range = assign_ids(cells)
+    ids = list(iterate_ids(cells, id_range))
     # All cells inside mesh have IDs >= 30000000
-    for id_, cell in zip(ids, mesh.cells):
-        if mesh.obstacles[0].inside(cell.position):
-            assert id_ >= 30000000
+    for id_, cell in zip(ids, cells):
+        if obstacle.inside(cell.position):
+            assert id_ >= 30000000, "pos: {}, id: {}".format(cell.position, id_)
     # Total numbers of cells with certain ID ranges
     assert_equal(len(list(filter(lambda id_: 40000000 > id_ >= 30000000, ids))), 12)
     assert_equal(len(list(filter(lambda id_: id_ >= 40000000, ids))), 12)
@@ -195,13 +236,13 @@ class TestGetType(object):
 
 def test_count_types():
     """Count the cell types in a mesh"""
-    mesh = make_mesh_with_nbody_cell(10)
-    ntypes = count_types(mesh.cells)
-    assert_equal(count_types(mesh.cells), [100, 0, 0, 0, 1, 0])
-    assert_equal(sum(ntypes), len(list(mesh.cells)))
+    cells = make_mesh_with_nbody_cell(10)
+    ntypes = count_types(cells)
+    assert_equal(count_types(cells), [100, 0, 0, 0, 1, 0])
+    assert_equal(sum(ntypes), len(list(cells)))
 
 
-def _hash_write(mesh):
+def _hash_write(cells):
     """
     Hash the file output of a initial conditions write
 
@@ -218,7 +259,7 @@ def _hash_write(mesh):
     with NamedTemporaryFile() as tmpfile:
         fname = tmpfile.name
     with open(fname, 'wb') as tmpfile:
-        write_icfile(tmpfile, mesh)
+        write_icfile(tmpfile, cells, assign_ids(cells))
     # Create MD5 hash and check it
     with open(fname, 'rb') as tmpfile:
         output_hash = md5(tmpfile.read()).hexdigest()
@@ -227,21 +268,21 @@ def _hash_write(mesh):
 
 def test_write_ics_md5():
     """Write initial conditions (md5 test)"""
-    mesh = _mesh_with_obstacle()
-    output_hash = _hash_write(mesh)
+    cells, _ = _mesh_with_obstacle()
+    output_hash = _hash_write(cells)
     assert_equal(output_hash, '2e552a0818d99285d43f1d857c3a4eaa')
 
 
 def test_iterate_ids_with_nbody():
     """Iterate over IDs of mesh N-body particle"""
-    mesh = make_mesh_with_nbody_cell(10)
-    ids = list(iterate_ids(mesh.cells))
+    cells = make_mesh_with_nbody_cell(10)
+    ids = list(iterate_ids(cells, assign_ids(cells)))
     assert_equal(len(ids), 101)
     assert_equal(ids, list(range(1, 102)))
 
 
 def test_write_ics_with_nbody_md5():
     """Write initial conditions with N-body particle (md5 test)"""
-    mesh = make_mesh_with_nbody_cell(10)
-    output_hash = _hash_write(mesh)
+    cells = make_mesh_with_nbody_cell(10)
+    output_hash = _hash_write(cells)
     assert_equal(output_hash, '6a819eb2f3e89eaf482a937e1d41f486')

@@ -70,21 +70,6 @@ class ParameterSetup(dict):
                     parameters[key] = value
         return parameters
 
-    def render_mesh(self, mesh):
-        """
-        Render a mesh into the initial conditions file
-
-        The initial conditions file is specified as the parameter
-        "InitCondFile" in the parameter setup. This function overwrites the
-        file with the initial conditions specified by the mesh supplied.
-
-        """
-        # Write initial conditions binary
-        with open(self['InitCondFile'], 'wb') as icfile:
-            write_icfile(icfile, mesh)
-        # Set the parameters depending on the mesh correctly
-        self['BoxSize'] = mesh.boxsize
-
     def write(self, file_name):
         """Writes the parameters to a file."""
         with open(file_name, 'w') as param_file:

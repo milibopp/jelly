@@ -6,6 +6,13 @@ This module monkeypatches assertions for Python 2.6 into nose.tools
 import nose.tools as nt
 
 
+def assert_is(x, y):
+    assert x is y, "{:?} and {:?} are not identical".format(x, y)
+
+if not hasattr(nt, 'assert_is'):
+    nt.assert_is = assert_is
+
+
 def assert_in(item, collection):
     assert item in collection, "{:r} not in {:r}".format(item, collection)
 

@@ -22,7 +22,7 @@ class TestCell(TestCase):
 
 
 def make_random_mesh(ncells=10):
-    return Mesh(
+    return make_mesh(
         UniformGas(),
         MonteCarloGrid2D(
             Box(Vector(0, 0), Vector(1, 1)),
@@ -39,7 +39,7 @@ def make_mesh_with_nbody_cell(gridres=32):
 
     """
     nbody_cell = Cell((0, 0, 0), (0, 0, 0), 2.0, 2.0, 'nbody')
-    return Mesh(
+    return make_mesh(
         UniformGas(),
         CartesianGrid2D(
             Box(Vector(0.0, 0.0), Vector(4.0, 4.0)),
@@ -49,8 +49,7 @@ def make_mesh_with_nbody_cell(gridres=32):
 
 def test_extra_objects():
     """Add additional cell collections to the mesh"""
-    mesh = make_mesh_with_nbody_cell()
-    cells = list(mesh.cells)
+    cells = make_mesh_with_nbody_cell()
     assert_equal(sum(1 for cell in cells if cell.category == 'nbody'), 1)
 
 

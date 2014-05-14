@@ -58,6 +58,7 @@ from abc import ABCMeta
 from operator import attrgetter
 
 from .model import ListCellCollection
+from .id_assign import CompoundIDRange, IDRange
 
 
 def make_f77_block(raw_block, pad=None):
@@ -149,31 +150,61 @@ def make_body(fmt, data):
     return make_f77_block(inner)
 
 
-def iterate_ids(cells):
+class DefaultIDRangeDispatcher(object):
+    """The default dispatcher for Arepo IC generation
+
+    By default, normal gas cells start at 1, solid cells at 30000000, gas cells
+    comoving with solids at 40000000. Each of the ID ranges can be overridden.
+
     """
-    Iterates over the computed IDs of a given mesh
 
-    Normal gas cells start at 1, gas cells comoving with solid cells at
-    30000000, solid cells at 40000000.
+    def __init__(self, standard_range=None, solid_range=None,
+                 solid_adjacent_range=None):
+        self.standard_range = standard_range or IDRange(1, 29999999)
+        self.solid_adjacent_range = (
+            solid_adjacent_range or IDRange(30000000, 39999999))
+        self.solid_range = solid_range or IDRange(40000000, 49999999)
 
-    As a side effect this function assigns the IDs to the cells it iterates
-    over.
+    def dispatch(self, cell):
+        """Dispatches cell to the appropriate ID range according to category"""
+        if cell.category == 'nbody' or cell.category == 'normal':
+            return self.standard_range
+        if cell.category == 'solid':
+            return self.solid_range
+        if cell.category == 'solid_adjacent':
+            return self.solid_adjacent_range
+        raise ValueError('cell does not have valid category ({:s})'.format(cell.category))
+
+    @property
+    def components(self):
+        """Component ID ranges"""
+        yield self.standard_range
+        yield self.solid_range
+        yield self.solid_adjacent_range
+
+
+def assign_ids(cells, id_range=None):
+    """Assign IDs to cells and return ID range object
+
+    This uses the DefaultIDRangeDispatcher by default, which can be overridden.
+
+    """
+    id_range = CompoundIDRange(DefaultIDRangeDispatcher())
+    for cell in cells:
+        id_range.assign_id(cell)
+    return id_range
+
+
+def iterate_ids(cells, id_range):
+    """Iterates over IDs of given cells
+
+    It uses an ID range and expects the IDs to be assigned.
 
     NOTE: never use zero as a cell ID, it causes the derefinement subroutines
     to crash, since they internally set the ID of removed cells to zero
 
     """
-    counter = {
-        'normal': 1,
-        'solid': 40000000,
-        'solid_adjacent': 30000000}
-    for cell in cells:
-        category = cell.category
-        if category == 'nbody':
-            category = 'normal' # Evil hack, fix this!
-        yield counter[category]
-        cell.ident = counter[category]
-        counter[category] += 1
+    return map(id_range.get_id, cells)
 
 
 def get_type_of_cell(cell):
@@ -211,17 +242,19 @@ def map_quantity(cells, attribute):
     return map(attrgetter(attribute), cells)
 
 
-def write_icfile(file_like, mesh):
+def write_icfile(file_like, cells, id_range=None, boxsize=1.0):
     """Write an initial conditions file"""
     # Do the iteration once
     # TODO: This should be handled in a file to decrease its memory footprint
     # for large grids
-    cells = sorted(mesh.cells, key=get_type_of_cell)
+    cells = sorted(cells, key=get_type_of_cell)
+    if not id_range:
+        id_range = assign_ids(cells)
     ntypes = count_types(cells)
-    file_like.write(make_default_header(ntypes, mesh.boxsize))
+    file_like.write(make_default_header(ntypes, boxsize))
     file_like.write(make_body('fff', map_quantity(cells, 'position')))
     file_like.write(make_body('fff', map_quantity(cells, 'velocity')))
-    file_like.write(make_body('I', iterate_ids(cells)))
+    file_like.write(make_body('I', iterate_ids(cells, id_range)))
     file_like.write(make_body('f', map_quantity(cells, 'density')))
     file_like.write(make_body('f', map_quantity(cells[:ntypes[0]], 'internal_energy')))
     file_like.write(make_body('f', map_quantity(cells[:ntypes[0]], 'density')))
