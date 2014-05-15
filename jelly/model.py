@@ -192,6 +192,23 @@ class Obstacle(object):
         pass
 
 
+def make_obstacle_cells(obstacle, background_gas):
+    """Generate cells for an obstacle
+
+    The return value is a tuple (fluids, solids) containing a list of the fluid
+    and solid cells generated. The solid cells are filled with a default
+    UniformGas, while the fluid cells require a background gas to be
+    approximated.
+
+    """
+    uniform = UniformGas()
+    fluids = list(map(lambda x: background_gas.create_cell(x, 'solid_adjacent'),
+        obstacle.fluids))
+    solids = list(map(lambda x: uniform.create_cell(x, 'solid'),
+        obstacle.solids))
+    return fluids, solids
+
+
 def make_mesh(gas, grid, obstacles=None, extras=None):
     """Create a whole mesh
 
@@ -203,8 +220,7 @@ def make_mesh(gas, grid, obstacles=None, extras=None):
     return (
         list(approximate_gas(gas, grid, obstacles))
         + list(chain(*[
-            list(obstacle.gas_cells(gas))
-            + list(obstacle.solid_cells())
+            chain(*make_obstacle_cells(obstacle, gas))
             for obstacle in (obstacles or [])
         ]))
         + list(chain(*(extras or [])))
