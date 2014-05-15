@@ -4,8 +4,7 @@ from unittest import TestCase
 from math import pi, cos, sin, sqrt
 
 from nose.tools import (assert_less_equal, assert_greater_equal, assert_in,
-    assert_equal, assert_false, assert_true, raises, assert_almost_in,
-    assert_greater, assert_less)
+    assert_equal, assert_false, assert_true, raises, assert_almost_in)
 
 from jelly.util import *
 
@@ -183,11 +182,11 @@ class TestCircularObstacle(object):
 
     def test_fluids(self):
         for pos in self.circle.fluids:
-            assert_greater(abs(pos), 1.0)
+            assert_greater_equal(abs(pos), 1.0)
 
     def test_solids(self):
         for pos in self.circle.solids:
-            assert_less(abs(pos), 1.0)
+            assert_less_equal(abs(pos), 1.0)
 
     def test_inside(self):
         """Inside-circle checks"""
