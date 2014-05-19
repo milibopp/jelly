@@ -192,3 +192,19 @@ class TestCircularObstacle(object):
         """Inside-circle checks"""
         assert_false(self.circle.inside((2.0, 0.0)))
         assert_true(self.circle.inside((0.0, 0.0)))
+
+
+class TestMultilayeredCircularObstacle(object):
+
+    def setup(self):
+        self.multi = CircularObstacle((0.0, 0.0), 1.0, n_phi=16, layers=2)
+
+    def test_number_of_grid_points(self):
+        expected_number = self.multi.n_phi * self.multi.layers
+        assert_equal(len(list(self.multi.fluids)), expected_number)
+        assert_equal(len(list(self.multi.solids)), expected_number)
+
+    def test_radii(self):
+        bound = 1 + 2 * pi / self.multi.n_phi
+        outer_fluids = filter(lambda pos: abs(pos) > bound, self.multi.fluids)
+        assert_equal(len(list(outer_fluids)), 16)

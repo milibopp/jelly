@@ -201,11 +201,12 @@ class CircularObstacle(Obstacle):
 
     """
 
-    def __init__(self, center, radius, n_phi=100, inverted=False):
+    def __init__(self, center, radius, n_phi=100, inverted=False, layers=1):
         self.center = center
         self.radius = radius
         self.n_phi = n_phi
         self.inverted = inverted
+        self.layers = layers
 
     @property
     def __angle_segment(self):
@@ -215,13 +216,13 @@ class CircularObstacle(Obstacle):
         """
         return 2 * pi / self.n_phi
 
-    def __circle_position(self, k, inner):
+    def __circle_position(self, k, inner, layer):
         """
         Calculate position of a cell on the circle using its running index and
         whether it is the inner or outer circle.
 
         """
-        r = self.radius * (1 + 0.5 * self.__angle_segment * (-1 if inner else 1))
+        r = self.radius * (1 + (layer - 0.5) * self.__angle_segment * (-1 if inner else 1))
         phi = (k + 0.5) * self.__angle_segment
         return Vector(
             r * sin(phi) + self.center[0],
@@ -231,14 +232,16 @@ class CircularObstacle(Obstacle):
     @property
     def fluids(self):
         """Generator of gas cells surrounding obstacle"""
-        for k in range(self.n_phi):
-            yield self.__circle_position(k, self.inverted)
+        for j in range(1, self.layers + 1):
+            for k in range(self.n_phi):
+                yield self.__circle_position(k, self.inverted, j)
 
     @property
     def solids(self):
         """Generator of solid obstacle cells"""
-        for k in range(self.n_phi):
-            yield self.__circle_position(k, not self.inverted)
+        for j in range(1, self.layers + 1):
+            for k in range(self.n_phi):
+                yield self.__circle_position(k, not self.inverted, j)
 
     def inside(self, position):
         """
@@ -246,6 +249,6 @@ class CircularObstacle(Obstacle):
 
         """
         dist = sum((self.center[i] - position[i]) ** 2.0 for i in [0, 1]) ** 0.5
-        extra_space = 1.5 * self.__angle_segment
+        extra_space = (self.layers + 0.5) * self.__angle_segment
         r_max = self.radius * (1 + extra_space * (-1 if self.inverted else 1))
         return (dist > r_max) if self.inverted else (dist < r_max)
