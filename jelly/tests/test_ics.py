@@ -100,7 +100,12 @@ def test_make_header():
         hubble_parameter=70.0,
         flag_stellarage=1,
         flag_metals=1,
-        flag_entropy_instead_u=1
+        flag_entropy_instead_u=1,
+        flag_doubleprecision=1,
+        flag_lpt_ics=1,
+        lpt_scalingfactor=1,
+        flag_tracer_field=1,
+        composition_vector_length=1,
     )
 
     header = make_header(**data)
@@ -122,7 +127,12 @@ def test_make_header():
     assert_equal(header[168:172], struct.pack('i', data["flag_metals"]))
     assert_equal(header[172:196], struct.pack('iiiiii', *(0, 0, 0, 0, 0, 0)))
     assert_equal(header[196:200], struct.pack('i', data["flag_entropy_instead_u"]))
-    assert_equal(header[200:260], six.b('\x00') * 60)
+    assert_equal(header[200:204], struct.pack('i', data["flag_doubleprecision"]))
+    assert_equal(header[204:208], struct.pack('i', data["flag_lpt_ics"]))
+    assert_equal(header[208:212], struct.pack('f', data["lpt_scalingfactor"]))
+    assert_equal(header[212:216], struct.pack('i', data["flag_tracer_field"]))
+    assert_equal(header[216:220], struct.pack('i', data["composition_vector_length"]))
+    assert_equal(header[220:260], six.b('\x00') * 40)
 
     assert_equal(len(header), 256 + 2 * 4)  # data + length fields
 
@@ -146,7 +156,12 @@ def test_make_header_large_n_all():
         hubble_parameter=70.0,
         flag_stellarage=1,
         flag_metals=1,
-        flag_entropy_instead_u=1
+        flag_entropy_instead_u=1,
+        flag_doubleprecision=1,
+        flag_lpt_ics=1,
+        lpt_scalingfactor=1,
+        flag_tracer_field=1,
+        composition_vector_length=1,
     )
 
     header = make_header(**data)
@@ -270,7 +285,7 @@ def test_write_ics_md5():
     """Write initial conditions (md5 test)"""
     cells, _ = _mesh_with_obstacle()
     output_hash = _hash_write(cells)
-    assert_equal(output_hash, '2e552a0818d99285d43f1d857c3a4eaa')
+    assert_equal(output_hash, '717cc22e0890deb67af19c7b445086c8')
 
 
 def test_iterate_ids_with_nbody():
@@ -285,4 +300,4 @@ def test_write_ics_with_nbody_md5():
     """Write initial conditions with N-body particle (md5 test)"""
     cells = make_mesh_with_nbody_cell(10)
     output_hash = _hash_write(cells)
-    assert_equal(output_hash, '6a819eb2f3e89eaf482a937e1d41f486')
+    assert_equal(output_hash, 'fb1abeec313777c7f57154561c7750a2')
