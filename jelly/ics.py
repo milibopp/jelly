@@ -249,7 +249,7 @@ def map_quantity(cells, attribute):
     return map(attrgetter(attribute), cells)
 
 
-def write_icfile(file_like, cells, id_range=None, boxsize=1.0):
+def write_icfile(file_like, cells, id_range=None, boxsize=1.0, double=False):
     """Write an initial conditions file"""
     # Do the iteration once
     # TODO: This should be handled in a file to decrease its memory footprint
@@ -258,10 +258,12 @@ def write_icfile(file_like, cells, id_range=None, boxsize=1.0):
     if not id_range:
         id_range = assign_ids(cells)
     ntypes = count_types(cells)
-    file_like.write(make_default_header(ntypes, boxsize))
-    file_like.write(make_body('fff', map_quantity(cells, 'position')))
-    file_like.write(make_body('fff', map_quantity(cells, 'velocity')))
+    fvec = 'ddd' if double else 'fff'
+    fscal = 'd' if double else 'f'
+    file_like.write(make_default_header(ntypes, boxsize, flag_doubleprecision=int(double)))
+    file_like.write(make_body(fvec, map_quantity(cells, 'position')))
+    file_like.write(make_body(fvec, map_quantity(cells, 'velocity')))
     file_like.write(make_body('I', iterate_ids(cells, id_range)))
-    file_like.write(make_body('f', map_quantity(cells, 'density')))
-    file_like.write(make_body('f', map_quantity(cells[:ntypes[0]], 'internal_energy')))
-    file_like.write(make_body('f', map_quantity(cells[:ntypes[0]], 'density')))
+    file_like.write(make_body(fscal, map_quantity(cells, 'density')))
+    file_like.write(make_body(fscal, map_quantity(cells[:ntypes[0]], 'internal_energy')))
+    file_like.write(make_body(fscal, map_quantity(cells[:ntypes[0]], 'density')))
