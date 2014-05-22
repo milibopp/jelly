@@ -1,8 +1,15 @@
 """Vector arithmetics"""
 
+
 class DimensionalityError(Exception):
-    """An exception raised, when the operation needs object of the same dimensionality, but it is different."""
+    """Exception for incompatible dimensionalities
+
+    An exception raised, when the operation needs object of the same
+    dimensionality, but it is different.
+
+    """
     pass
+
 
 class Vector(object):
 
@@ -74,6 +81,7 @@ class Vector(object):
 
     def unit(self):
         return self / abs(self)
+
 
 def dot(v1, v2):
     """Dot product of two vectors"""

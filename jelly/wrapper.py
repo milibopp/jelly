@@ -163,7 +163,6 @@ class ArepoInstallation(object):
 
     """
 
-
     def __init__(self, directory=None):
         self.directory = directory or get_config('arepo-local')
         if not self.__check_dir():
@@ -258,5 +257,5 @@ class ArepoRun(object):
         pfile = 'jelly-params.txt'
         parameters.write(pfile)
         # Run the simulation
-        subprocess.call(['mpirun', '-np', str(self.proc_count),
-            '.arepo/Arepo', pfile])
+        subprocess.call([
+            'mpirun', '-np', str(self.proc_count), '.arepo/Arepo', pfile])

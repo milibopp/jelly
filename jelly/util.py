@@ -39,7 +39,6 @@ class Box(object):
         self.size = size
 
 
-
 class MonteCarloGrid2D(object):
     """
     A completely random 2d grid.
@@ -57,7 +56,8 @@ class MonteCarloGrid2D(object):
 
     def __iter__(self):
         for _ in range(self.number):
-            x, y = (uniform(p, dp) for p, dp in zip(self.box.position, self.box.position + self.box.size))
+            x, y = (uniform(p, dp) for p, dp in zip(
+                self.box.position, self.box.position + self.box.size))
             yield Vector(x, y, 0.0)
 
 
@@ -78,7 +78,8 @@ class MonteCarloGrid3D(object):
 
     def __iter__(self):
         for _ in range(self.number):
-            x, y, z = (uniform(p, dp) for p, dp in zip(self.box.position, self.box.position + self.box.size))
+            x, y, z = (uniform(p, dp) for p, dp in zip(
+                self.box.position, self.box.position + self.box.size))
             yield Vector(x, y, z)
 
 
@@ -133,7 +134,6 @@ class CartesianGrid3D(object):
                        (kz + 0.5) * dz / nz)
 
 
-
 class PolarGrid2D(object):
     """
     A 2D grid resembling polar coordinates
@@ -158,7 +158,7 @@ class PolarGrid2D(object):
             n_phi = int(2 * pi * r / self.resolution)
             phi_step = 2 * pi / n_phi
             for phi in [phi_step * n for n in range(n_phi)]:
-                yield self.center + Vector(r*cos(phi), r*sin(phi), 0.0)
+                yield self.center + Vector(r * cos(phi), r * sin(phi), 0.0)
 
 
 class LogarithmicPolarGrid2D(object):

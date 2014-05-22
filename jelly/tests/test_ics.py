@@ -110,12 +110,12 @@ def test_make_header():
 
     header = make_header(**data)
 
-    assert_equal(header[4:28],    struct.pack('iiiiii', *data["n_part"]))
-    assert_equal(header[28:76],   struct.pack('dddddd', *data["mass_arr"]))
-    assert_equal(header[76:84],   struct.pack('d', data["time"]))
-    assert_equal(header[84:92],   struct.pack('d', data["redshift"]))
-    assert_equal(header[92:96],   struct.pack('i', data["flag_sfr"]))
-    assert_equal(header[96:100],  struct.pack('i', data["flag_feedback"]))
+    assert_equal(header[4:28], struct.pack('iiiiii', *data["n_part"]))
+    assert_equal(header[28:76], struct.pack('dddddd', *data["mass_arr"]))
+    assert_equal(header[76:84], struct.pack('d', data["time"]))
+    assert_equal(header[84:92], struct.pack('d', data["redshift"]))
+    assert_equal(header[92:96], struct.pack('i', data["flag_sfr"]))
+    assert_equal(header[96:100], struct.pack('i', data["flag_feedback"]))
     assert_equal(header[100:124], struct.pack('iiiiii', *data["n_all"]))
     assert_equal(header[124:128], struct.pack('i', data["flag_cooling"]))
     assert_equal(header[128:132], struct.pack('i', data["num_files"]))
@@ -147,7 +147,9 @@ def test_make_header_large_n_all():
         redshift=50.1,
         flag_sfr=1,
         flag_feedback=1,
-        n_all=(2**32 + 100, 2**33 + 200, 2**34 + 300, 2**35 + 400, 2**36 + 500, 2**37 + 600),
+        n_all=(
+            2 ** 32 + 100, 2 ** 33 + 200, 2 ** 34 + 300, 2 ** 35 + 400,
+            2 ** 36 + 500, 2 ** 37 + 600),
         flag_cooling=1,
         num_files=1,
         box_size=1.0,
@@ -167,7 +169,8 @@ def test_make_header_large_n_all():
     header = make_header(**data)
 
     assert_equal(header[100:124], struct.pack('iiiiii', 100, 200, 300, 400, 500, 600))
-    assert_equal(header[172:196], struct.pack('iiiiii', 2**0, 2**1, 2**2, 2**3, 2**4, 2**5))
+    assert_equal(header[172:196], struct.pack(
+        'iiiiii', 2 ** 0, 2 ** 1, 2 ** 2, 2 ** 3, 2 ** 4, 2 ** 5))
 
     assert_equal(len(header), 264)
 

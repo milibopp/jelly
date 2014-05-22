@@ -113,26 +113,28 @@ def make_header(n_part, mass_arr, time, redshift, flag_sfr, flag_feedback,
     inner += struct.pack('ddd', omega0, omega_lambda, hubble_parameter)
     inner += struct.pack('ii', flag_stellarage, flag_metals)
     inner += n_all_binary_higher
-    inner += struct.pack('iiifii', flag_entropy_instead_u,
-        flag_doubleprecision, flag_lpt_ics, lpt_scalingfactor,
-        flag_tracer_field, composition_vector_length)
+    inner += struct.pack(
+        'iiifii', flag_entropy_instead_u, flag_doubleprecision, flag_lpt_ics,
+        lpt_scalingfactor, flag_tracer_field, composition_vector_length)
     return make_f77_block(inner, 256)
 
 
-def make_default_header(n_types, time=0.0, redshift=0.0,
-        flag_sfr=0, flag_feedback=0, flag_cooling=0, box_size=1.0, omega0=1.0,
-        omega_lambda=0.0, hubble_parameter=70.0, flag_stellarage=0,
-        flag_metals=0, flag_entropy_instead_u=0, flag_doubleprecision=0,
-        flag_lpt_ics=0, lpt_scalingfactor=1.0, flag_tracer_field=0,
+def make_default_header(
+        n_types, time=0.0, redshift=0.0, flag_sfr=0, flag_feedback=0,
+        flag_cooling=0, box_size=1.0, omega0=1.0, omega_lambda=0.0,
+        hubble_parameter=70.0, flag_stellarage=0, flag_metals=0,
+        flag_entropy_instead_u=0, flag_doubleprecision=0, flag_lpt_ics=0,
+        lpt_scalingfactor=1.0, flag_tracer_field=0,
         composition_vector_length=0):
     """Make a header with some reasonable default assumptions."""
     mass_arr = (0.0,) * 6
     num_files = 1
-    return make_header(n_types, mass_arr, time, redshift, flag_sfr,
-        flag_feedback, n_types, flag_cooling, num_files, box_size, omega0,
-        omega_lambda, hubble_parameter, flag_stellarage, flag_metals,
-        flag_entropy_instead_u, flag_doubleprecision, flag_lpt_ics,
-        lpt_scalingfactor, flag_tracer_field, composition_vector_length)
+    return make_header(
+        n_types, mass_arr, time, redshift, flag_sfr, flag_feedback, n_types,
+        flag_cooling, num_files, box_size, omega0, omega_lambda,
+        hubble_parameter, flag_stellarage, flag_metals, flag_entropy_instead_u,
+        flag_doubleprecision, flag_lpt_ics, lpt_scalingfactor,
+        flag_tracer_field, composition_vector_length)
 
 
 def make_body(fmt, data):

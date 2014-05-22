@@ -79,11 +79,9 @@ class UniformGas(Gas):
 
     """
 
-    def __init__(self,
-            velocity=Vector(0.0, 0.0, 0.0),
-            density=1.0,
-            internal_energy=1.0
-            ):
+    def __init__(
+            self, velocity=Vector(0.0, 0.0, 0.0), density=1.0,
+            internal_energy=1.0):
         self.__velocity = velocity
         self.__density = density
         self.__internal_energy = internal_energy
@@ -127,8 +125,8 @@ def approximate_gas(gas, grid, obstacles=None):
     for grid_point in grid:
         valid = True
         if obstacles:
-            valid = not any(obstacle.inside(grid_point)
-                for obstacle in obstacles)
+            valid = not any(
+                obstacle.inside(grid_point) for obstacle in obstacles)
         if valid:
             yield gas.create_cell(grid_point)
 
@@ -202,10 +200,10 @@ def make_obstacle_cells(obstacle, background_gas):
 
     """
     uniform = UniformGas()
-    fluids = list(map(lambda x: background_gas.create_cell(x, 'solid_adjacent'),
-        obstacle.fluids))
-    solids = list(map(lambda x: uniform.create_cell(x, 'solid'),
-        obstacle.solids))
+    fluids = list(map(
+        lambda x: background_gas.create_cell(x, 'solid_adjacent'), obstacle.fluids))
+    solids = list(map(
+        lambda x: uniform.create_cell(x, 'solid'), obstacle.solids))
     return fluids, solids
 
 
