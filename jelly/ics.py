@@ -113,26 +113,28 @@ def make_header(n_part, mass_arr, time, redshift, flag_sfr, flag_feedback,
     inner += struct.pack('ddd', omega0, omega_lambda, hubble_parameter)
     inner += struct.pack('ii', flag_stellarage, flag_metals)
     inner += n_all_binary_higher
-    inner += struct.pack('iiifii', flag_entropy_instead_u,
-        flag_doubleprecision, flag_lpt_ics, lpt_scalingfactor,
-        flag_tracer_field, composition_vector_length)
+    inner += struct.pack(
+        'iiifii', flag_entropy_instead_u, flag_doubleprecision, flag_lpt_ics,
+        lpt_scalingfactor, flag_tracer_field, composition_vector_length)
     return make_f77_block(inner, 256)
 
 
-def make_default_header(n_types, time=0.0, redshift=0.0,
-        flag_sfr=0, flag_feedback=0, flag_cooling=0, box_size=1.0, omega0=1.0,
-        omega_lambda=0.0, hubble_parameter=70.0, flag_stellarage=0,
-        flag_metals=0, flag_entropy_instead_u=0, flag_doubleprecision=0,
-        flag_lpt_ics=0, lpt_scalingfactor=1.0, flag_tracer_field=0,
+def make_default_header(
+        n_types, time=0.0, redshift=0.0, flag_sfr=0, flag_feedback=0,
+        flag_cooling=0, box_size=1.0, omega0=1.0, omega_lambda=0.0,
+        hubble_parameter=70.0, flag_stellarage=0, flag_metals=0,
+        flag_entropy_instead_u=0, flag_doubleprecision=0, flag_lpt_ics=0,
+        lpt_scalingfactor=1.0, flag_tracer_field=0,
         composition_vector_length=0):
     """Make a header with some reasonable default assumptions."""
     mass_arr = (0.0,) * 6
     num_files = 1
-    return make_header(n_types, mass_arr, time, redshift, flag_sfr,
-        flag_feedback, n_types, flag_cooling, num_files, box_size, omega0,
-        omega_lambda, hubble_parameter, flag_stellarage, flag_metals,
-        flag_entropy_instead_u, flag_doubleprecision, flag_lpt_ics,
-        lpt_scalingfactor, flag_tracer_field, composition_vector_length)
+    return make_header(
+        n_types, mass_arr, time, redshift, flag_sfr, flag_feedback, n_types,
+        flag_cooling, num_files, box_size, omega0, omega_lambda,
+        hubble_parameter, flag_stellarage, flag_metals, flag_entropy_instead_u,
+        flag_doubleprecision, flag_lpt_ics, lpt_scalingfactor,
+        flag_tracer_field, composition_vector_length)
 
 
 def make_body(fmt, data):
@@ -249,7 +251,7 @@ def map_quantity(cells, attribute):
     return map(attrgetter(attribute), cells)
 
 
-def write_icfile(file_like, cells, id_range=None, boxsize=1.0):
+def write_icfile(file_like, cells, id_range=None, boxsize=1.0, double=False):
     """Write an initial conditions file"""
     # Do the iteration once
     # TODO: This should be handled in a file to decrease its memory footprint
@@ -258,10 +260,12 @@ def write_icfile(file_like, cells, id_range=None, boxsize=1.0):
     if not id_range:
         id_range = assign_ids(cells)
     ntypes = count_types(cells)
-    file_like.write(make_default_header(ntypes, boxsize))
-    file_like.write(make_body('fff', map_quantity(cells, 'position')))
-    file_like.write(make_body('fff', map_quantity(cells, 'velocity')))
+    fvec = 'ddd' if double else 'fff'
+    fscal = 'd' if double else 'f'
+    file_like.write(make_default_header(ntypes, boxsize, flag_doubleprecision=int(double)))
+    file_like.write(make_body(fvec, map_quantity(cells, 'position')))
+    file_like.write(make_body(fvec, map_quantity(cells, 'velocity')))
     file_like.write(make_body('I', iterate_ids(cells, id_range)))
-    file_like.write(make_body('f', map_quantity(cells, 'density')))
-    file_like.write(make_body('f', map_quantity(cells[:ntypes[0]], 'internal_energy')))
-    file_like.write(make_body('f', map_quantity(cells[:ntypes[0]], 'density')))
+    file_like.write(make_body(fscal, map_quantity(cells, 'density')))
+    file_like.write(make_body(fscal, map_quantity(cells[:ntypes[0]], 'internal_energy')))
+    file_like.write(make_body(fscal, map_quantity(cells[:ntypes[0]], 'density')))

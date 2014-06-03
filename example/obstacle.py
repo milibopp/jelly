@@ -15,14 +15,11 @@ from jelly.vector import Vector
 # Setup gas and grid
 gas = UniformGas()
 grid = CartesianGrid2D(
-        Box(Vector(0.0, 0.0), Vector(1.0, 1.0)),
-        (32, 32))
+    Box(Vector(0.0, 0.0), Vector(1.0, 1.0)), (32, 32))
 
 # Setup a circular obstacle
 circle = CircularObstacle(
-        center=Vector(0.5, 0.5),
-        radius=0.1,
-        n_phi=100)
+    center=Vector(0.5, 0.5), radius=0.1, n_phi=100)
 
 # Combine everything into a mesh
 mesh = Mesh(gas, grid, [circle])

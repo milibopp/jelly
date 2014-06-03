@@ -37,6 +37,7 @@ def test_not_equal():
     assert_false(Vector(1.0, 2.0) != Vector(1.0, 2.0))
     assert_true(Vector(1.0, 2.0) != Vector(0.0, 0.0))
 
+
 @raises(NotImplementedError)
 def test_greater():
     """Vector > operator"""""
@@ -103,6 +104,7 @@ def test_hash():
     """Hash vector"""
     assert_equal(hash(Vector(1.0, 2.0)), hash(Vector(1.0, 2.0)))
 
+
 def test_div():
     """Divide vector by scalar"""
     assert_equal(Vector(4.0, 1.0) / 2.0, Vector(2.0, 0.5))
@@ -134,10 +136,12 @@ def test_add_different_sizes():
     """Add vectors of different sizes"""
     Vector(1.0) + Vector(2.0, 3.0)
 
+
 @raises(DimensionalityError)
 def test_subtract_different_sizes():
     """Subtract vectors of different sizes"""
     Vector(1.0) - Vector(2.0, 3.0)
+
 
 @raises(DimensionalityError)
 def test_dot_different_sizes():

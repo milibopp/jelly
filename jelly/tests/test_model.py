@@ -65,7 +65,7 @@ def test_uniform_gas():
 def test_functional_gas():
     """Functional gas"""
     gas = FunctionalGas(
-        lambda x: 2*x,
+        lambda x: 2 * x,
         lambda x: abs(x),
         lambda x: abs(x) * 0.5)
     cell = gas.create_cell(Vector(4.0, -3.0, 0.0))
