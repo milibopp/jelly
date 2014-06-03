@@ -16,6 +16,8 @@ Code status
 
 .. image:: https://travis-ci.org/aepsil0n/jelly.png?branch=master
     :target: https://travis-ci.org/aepsil0n/jelly
+.. image:: https://coveralls.io/repos/aepsil0n/jelly/badge.png?branch=master
+    :target: https://coveralls.io/r/aepsil0n/jelly
 
 
 Examples
