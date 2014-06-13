@@ -89,8 +89,6 @@ class CartesianGrid2D(object):
     resolution is given as a 2-tuple of the coordinate resolutions in x and y
     direction.
 
-    Hydrodynamic quantities are given as a function of the position vector.
-
     The returned vector has three dimensions.
 
     """
@@ -114,8 +112,6 @@ class CartesianGrid3D(object):
     A 3D rectangular Cartesian grid spanning a *cube*. The grid
     resolution is given as a 3-tuple of the coordinate resolutions in x, y and
     z direction.
-
-    Hydrodynamic quantities are given as a function of the position vector.
 
     """
 
