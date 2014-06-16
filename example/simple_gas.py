@@ -9,7 +9,7 @@ constant gas distribution and approximating this with a rectangular grid.
 import sys
 
 from jelly.ics import write_icfile
-from jelly.model import Mesh, UniformGas
+from jelly.model import make_mesh, UniformGas
 from jelly.util import CartesianGrid2D, Box
 from jelly.vector import Vector
 
@@ -23,7 +23,7 @@ grid = CartesianGrid2D(
     Box(Vector(0.0, 0.0), Vector(1.0, 1.0)), (32, 32))
 
 # Combine everything into a mesh
-mesh = Mesh(gas, grid)
+mesh = make_mesh(gas, grid)
 
 # Write the mesh to a file
 with open('simple_gas.dat', 'wb') as icfile:

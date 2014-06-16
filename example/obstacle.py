@@ -7,7 +7,7 @@ conditions.
 """
 
 from jelly.ics import write_icfile
-from jelly.model import Mesh, UniformGas
+from jelly.model import make_mesh, UniformGas
 from jelly.util import CartesianGrid2D, Box, CircularObstacle
 from jelly.vector import Vector
 
@@ -22,7 +22,7 @@ circle = CircularObstacle(
     center=Vector(0.5, 0.5), radius=0.1, n_phi=100)
 
 # Combine everything into a mesh
-mesh = Mesh(gas, grid, [circle])
+mesh = make_mesh(gas, grid, [circle])
 
 # Write the mesh to a file
 with open('obstacle.dat', 'wb') as icfile:
