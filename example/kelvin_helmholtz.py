@@ -14,9 +14,10 @@ from jelly.util import CartesianGrid2D, Box
 from jelly.vector import Vector
 
 
-# Describe the initial conditions using a couple of functions
 def gauss(x, mu, omega):
+    """Gauss function (non-normalized)"""
     return exp(-((x - mu) / (2 * omega)) ** 2)
+
 
 def kh_velocity(x):
     vy0, omega = 0.1, 0.05 / sqrt(2)
@@ -27,22 +28,27 @@ def kh_velocity(x):
     )
     return bulk + excite
 
+
 def kh_density(x):
     return 2 if 0.25 < x[1] < 0.75 else 1
+
 
 def kh_internal_energy(x):
     return 2.5 / (kh_density(x) * (5/3 - 1))
 
-gas = FunctionalGas(
-    density=kh_density, velocity=kh_velocity,
-    internal_energy=kh_internal_energy)
 
-# Create a grid, on which the gas is to be approximated
-grid = CartesianGrid2D(Box(Vector(0, 0), Vector(1, 1)), (128, 128))
+if __name__ == "__main__":
+    # Describe the initial conditions using a couple of functions
+    gas = FunctionalGas(
+        density=kh_density, velocity=kh_velocity,
+        internal_energy=kh_internal_energy)
 
-# Now generate the mesh...
-mesh = make_mesh(gas, grid)
+    # Create a grid, on which the gas is to be approximated
+    grid = CartesianGrid2D(Box(Vector(0, 0), Vector(1, 1)), (128, 128))
 
-# ...and write it to a file
-with open("kh_instab.dat", "wb") as icfile:
-    write_icfile(icfile, mesh, double=True)
+    # Now generate the mesh...
+    mesh = make_mesh(gas, grid)
+
+    # ...and write it to a file
+    with open("kh_instab.dat", "wb") as icfile:
+        write_icfile(icfile, mesh, double=True)
