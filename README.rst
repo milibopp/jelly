@@ -1,8 +1,6 @@
 jelly
 =====
 
-*Abstraction layer for running numerical hydrodynamics software*
-
 ``jelly`` is supposed to abstract away the technical complexities of running
 numerical moving-mesh hydrodynamics simulations using `Arepo`_. It generates
 input files and wraps the invocation of simulation runs.
