@@ -24,6 +24,7 @@ class IDRange(object):
         self.end = end
         self._state = start
         self._map = {}
+        self._inverse_map = {}
 
     def assign_id(self, obj):
         """Assign an ID to an object
@@ -37,16 +38,15 @@ class IDRange(object):
         """
         if self._state > self.end:
             raise RangeExhaustedError('ID range is exhausted')
-        if obj in six.itervalues(self._map):
+        if id(obj) in self._inverse_map:
             raise ValueError('duplicate object')
         self._map[self._state] = obj
+        self._inverse_map[id(obj)] = self._state
         self._state += 1
 
     def get_id(self, obj):
         """Get the ID of an object"""
-        for key, value in six.iteritems(self._map):
-            if value is obj:
-                return key
+        return self._inverse_map.get(id(obj))
 
     def get_object(self, object_id):
         """Get the object associated with a given ID"""
