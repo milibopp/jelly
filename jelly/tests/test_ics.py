@@ -260,7 +260,7 @@ def test_count_types():
     assert_equal(sum(ntypes), len(list(cells)))
 
 
-def _hash_write(cells):
+def _hash_write(cells, ids=None):
     """
     Hash the file output of a initial conditions write
 
@@ -277,7 +277,7 @@ def _hash_write(cells):
     with NamedTemporaryFile() as tmpfile:
         fname = tmpfile.name
     with open(fname, 'wb') as tmpfile:
-        write_icfile(tmpfile, cells, assign_ids(cells))
+        write_icfile(tmpfile, cells, ids)
     # Create MD5 hash and check it
     with open(fname, 'rb') as tmpfile:
         output_hash = md5(tmpfile.read()).hexdigest()
@@ -288,6 +288,13 @@ def test_write_ics_md5():
     """Write initial conditions (md5 test)"""
     cells, _ = _mesh_with_obstacle()
     output_hash = _hash_write(cells)
+    assert_equal(output_hash, '717cc22e0890deb67af19c7b445086c8')
+
+
+def test_write_ics_md5_manual_ids():
+    """Write initial conditions (md5 test)"""
+    cells, _ = _mesh_with_obstacle()
+    output_hash = _hash_write(cells, assign_ids(cells))
     assert_equal(output_hash, '717cc22e0890deb67af19c7b445086c8')
 
 
